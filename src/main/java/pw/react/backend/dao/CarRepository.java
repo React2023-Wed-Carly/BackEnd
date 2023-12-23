@@ -7,4 +7,6 @@ import java.util.*;
 
 public interface CarRepository extends JpaRepository<Car, Long>{
     Collection<Car> findCarsByOwnerID(long OwnerID);
+
 }
+    

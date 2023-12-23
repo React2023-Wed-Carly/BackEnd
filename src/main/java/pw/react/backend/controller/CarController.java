@@ -30,7 +30,7 @@ public class CarController {
     public CarController(CarService carService) {
         this.carService = carService;
     }
-
+@Operation(summary = "get cars by owner id")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
@@ -42,7 +42,7 @@ public class CarController {
                     description = "Something went wrong"
             )
     })
-    @GetMapping(path = "/{OwnerID}")
+    @GetMapping(path = "/")
     public ResponseEntity<Collection<CarDto>> GetOwnersCars(@RequestParam("OwnerID") long ownerID ) {
         try {
             Collection<CarDto> Cars = carService.getByOwnerID(ownerID).stream().map(CarDto::valueFrom).toList();

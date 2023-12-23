@@ -11,6 +11,7 @@ import pw.react.backend.dao.UserRepository;
 import pw.react.backend.models.User;
 import pw.react.backend.services.CarMainService;
 import pw.react.backend.services.CarService;
+import pw.react.backend.services.UserMainService;
 import pw.react.backend.services.UserService;
 
 import javax.sql.DataSource;
@@ -37,7 +38,7 @@ public class BatchConfig {
 
     @Bean
     public UserService userService(UserRepository userRepository, PasswordEncoder passwordEncoder, BatchRepository<User> userBatchRepository) {
-        return new UserBatchService(userRepository, passwordEncoder, userBatchRepository);
+        return new UserMainService(userRepository, passwordEncoder);
     }
 
 

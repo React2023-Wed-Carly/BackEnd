@@ -22,6 +22,11 @@ public class UserMainService implements UserService {
     }
 
     @Override
+    public Optional<User> FindByUserName(User user) {
+        return userRepository.findByUsername(user.getUsername());
+    }
+
+    @Override
     public Collection<User> GetAll() {
         return userRepository.findAll();
     }
@@ -33,9 +38,11 @@ public class UserMainService implements UserService {
             Optional<User> dbUser = userRepository.findByUsername(user.getUsername());
             if (dbUser.isPresent()) {
                 log.info("User already exists. Updating it.");
-                user.setId(dbUser.get().getId());
-                user.setPassword(passwordEncoder.encode(user.getPassword()));
+                //user.setId(dbUser.get().getId());
+              //  user.setPassword(passwordEncoder.encode(user.getPassword()));
+                return null;
             }
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
             user = userRepository.save(user);
             log.info("User was saved.");
         }

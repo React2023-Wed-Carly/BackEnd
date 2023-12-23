@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import pw.react.backend.exceptions.UserValidationException;
 import pw.react.backend.services.UserService;
 import pw.react.backend.web.UserDto;
-
+import pw.react.backend.models.User;
 import java.util.Collection;
 
 @RestController
@@ -31,12 +31,12 @@ public class UserController {
         this.userService = userService;
     }
 
-    @Operation(summary = "Create new users")
+    @Operation(summary = "Create new user")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
-                    description = "Users created",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(allOf = UserDto.class))}
+                    description = "User created",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(oneOf = UserDto.class))}
             ),
             @ApiResponse(
                     responseCode = "401",
@@ -44,15 +44,13 @@ public class UserController {
             )
     })
     @PostMapping(path = "")
-    public ResponseEntity<Collection<UserDto>> createUsers(@RequestBody Collection<UserDto> users) {
+    public ResponseEntity<UserDto> createUser(@RequestBody UserDto user) {
         try {
-            Collection<UserDto> newUsers = userService.batchSave(users.stream().map(UserDto::convertToUser).toList())
-                    .stream()
-                    .map(UserDto::valueFrom)
-                    .toList();
-
+            User us= userService.validateAndSave(UserDto.convertToUser(user));
+            if(us==null)
+                throw new UserValidationException("username already exists");
             log.info("Password is not going to be encoded");
-            return ResponseEntity.status(HttpStatus.CREATED).body(newUsers);
+            return ResponseEntity.status(HttpStatus.CREATED).body(UserDto.valueFrom(us));
         } catch (Exception ex) {
             throw new UserValidationException(ex.getMessage(), USERS_PATH);
         }
@@ -70,9 +68,9 @@ public class UserController {
             )
     })
     @GetMapping(path = "")
-    public ResponseEntity<Collection<UserDto>> GetUsers(@RequestBody(required = false)Void B) {
-        try {
-            Collection<UserDto> Usrs=userService.GetAll().stream().map(UserDto::valueFrom).toList();
+    public ResponseEntity<Collection<UserDto>> GetUsers() {
+        try{
+            Collection<UserDto> Usrs=userService.GetAll().stream().filter(User::isAdmin).map(UserDto::valueFrom).toList();
 
             log.info("Password is not going to be encoded");
             return ResponseEntity.ok(Usrs);
