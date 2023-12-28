@@ -12,17 +12,23 @@ public class Car {
     @Column
     private Long ownerID;
     @Column
-    private String name; //moze split na marka i model oddzielnie (?)
+    private String brand;
+    @Column
+    private String model;
     @Column
     private Long mileage;
     @Column
-    private Integer yearOfManufacture;
+    private Integer year;
     @Column
-    private Long pricePerDay;
+    private Long dailyPrice;
     @Column
-    private String pictureUrl; //string z urlem do zdjecia (?)
+    private String photo;
     @Column
     private String description;
+    @Column
+    private Double latitude;
+    @Column
+    private Double longitude;
     public Long getId() {
         return id;
     }
@@ -35,11 +41,17 @@ public class Car {
     public void setOwnerID(Long ownerID) {
         this.ownerID = ownerID;
     }
-    public String getName() {
-        return name;
+    public String getBrand() {
+        return brand;
     }
-    public void setName(String name) {
-        this.name = name;
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+    public String getModel() {
+        return model;
+    }
+    public void setModel(String model) {
+        this.model = model;
     }
 
     public Long getMileage() {
@@ -48,14 +60,18 @@ public class Car {
     public void setMileage(Long mileage) {
         this.mileage = mileage;
     }
-    public Integer getYearOfManufacture(){return this.yearOfManufacture;}
-    public void setYearOfManufacture(Integer yearOfManufacture) {
-        this.yearOfManufacture = yearOfManufacture;
+    public Integer getYear(){return this.year;}
+    public void setYear(Integer year) {
+        this.year = year;
     }
-    public Long getPricePerDay() { return pricePerDay; }
-    public void setPricePerDay(Long pricePerDay) { this.pricePerDay = pricePerDay; }
-    public String getPictureUrl() { return pictureUrl; }
-    public void setPictureUrl(String pictureUrl) { this.pictureUrl = pictureUrl; }
+    public Long getDailyPrice() { return dailyPrice; }
+    public void setDailyPrice(Long dailyPrice) { this.dailyPrice = dailyPrice; }
+    public String getPhoto() { return photo; }
+    public void setPhoto(String photo) { this.photo = photo; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+    public Double getLatitude() { return latitude; }
+    public void setLatitude(Double latitude) { this.latitude = latitude; }
+    public Double getLongitude() { return longitude; }
+    public void setLongitude(Double longitude) { this.longitude = longitude; }
 }

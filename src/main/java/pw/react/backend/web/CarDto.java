@@ -1,22 +1,27 @@
 package pw.react.backend.web;
 import pw.react.backend.models.Car;
-public record CarDto(Long id, String name, Long mileage, Integer yearOfManufature, Long ownerID,
-                     Long pricePerDay, String pictureUrl, String description) {
+public record CarDto(Long id, String brand, String model, Long mileage, Integer year,
+                     Long ownerID, Long dailyPrice, String photo, String description,
+                     Double latitude, Double longitude) {
     public static CarDto valueFrom(Car c){
-        return new CarDto(c.getId(), c.getName(), c.getMileage(), c.getYearOfManufacture(), c.getOwnerID(),
-                c.getPricePerDay(), c.getPictureUrl(), c.getDescription());
+        return new CarDto(c.getId(), c.getBrand(), c.getModel(), c.getMileage(), c.getYear(),
+                c.getOwnerID(), c.getDailyPrice(), c.getPhoto(), c.getDescription(),
+                c.getLatitude(), c.getLongitude());
     }
     public static Car ConvertToCar(CarDto cd)
     {
         Car car=new Car();
         car.setId(cd.id);
-        car.setName(cd.name);
+        car.setBrand(cd.brand);
+        car.setModel(cd.model);
         car.setMileage(cd.mileage);
         car.setOwnerID(cd.ownerID);
-        car.setYearOfManufacture((cd.yearOfManufature));
-        car.setPricePerDay(cd.pricePerDay);
-        car.setPictureUrl(cd.pictureUrl);
+        car.setYear(cd.year);
+        car.setDailyPrice(cd.dailyPrice);
+        car.setPhoto(cd.photo);
         car.setDescription(cd.description);
+        car.setLatitude(cd.latitude);
+        car.setLongitude(cd.longitude);
         return car;
     }
 }
