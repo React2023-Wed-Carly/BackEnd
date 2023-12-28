@@ -10,48 +10,52 @@ public class Car {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column
-    private long ownerID;
+    private Long ownerID;
     @Column
-    private String name;
+    private String name; //moze split na marka i model oddzielnie (?)
     @Column
-    private long mileage ;
+    private Long mileage;
     @Column
-    private int yearOfManufacture;
+    private Integer yearOfManufacture;
+    @Column
+    private Long pricePerDay;
+    @Column
+    private String pictureUrl; //string z urlem do zdjecia (?)
+    @Column
+    private String description;
     public Long getId() {
         return id;
     }
-    public long getOwnerId(){return this.ownerID;}
-
-    public void setOwnerID(long ownerID) {
-        this.ownerID = ownerID;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public long getMileage() {
-        return mileage;
-    }
-
-    public long getOwnerID() {
-        return ownerID;
-    }
-
     public void setId(Long id) {
         this.id = id;
     }
-
-    public void setMileage(long mileage) {
-        this.mileage = mileage;
+    public Long getOwnerID() {
+        return ownerID;
     }
-
+    public void setOwnerID(Long ownerID) {
+        this.ownerID = ownerID;
+    }
+    public String getName() {
+        return name;
+    }
     public void setName(String name) {
         this.name = name;
     }
-    public int getYearOfManufacture(){return this.yearOfManufacture;}
 
-    public void setYearOfManufacture(int yearOfManufacture) {
+    public Long getMileage() {
+        return mileage;
+    }
+    public void setMileage(Long mileage) {
+        this.mileage = mileage;
+    }
+    public Integer getYearOfManufacture(){return this.yearOfManufacture;}
+    public void setYearOfManufacture(Integer yearOfManufacture) {
         this.yearOfManufacture = yearOfManufacture;
     }
+    public Long getPricePerDay() { return pricePerDay; }
+    public void setPricePerDay(Long pricePerDay) { this.pricePerDay = pricePerDay; }
+    public String getPictureUrl() { return pictureUrl; }
+    public void setPictureUrl(String pictureUrl) { this.pictureUrl = pictureUrl; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 }
