@@ -38,7 +38,7 @@ public class CarMainService implements CarService{
             logger.info("Car with id {} updated.", id);
             return result;
         }
-        throw new ResourceNotFoundException(String.format("Company with id [%d] not found.", id));
+        throw new ResourceNotFoundException(String.format("Car with id [%d] not found.", id));
     }
 
     @Override

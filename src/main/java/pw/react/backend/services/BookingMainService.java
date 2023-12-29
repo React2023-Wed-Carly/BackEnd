@@ -34,10 +34,10 @@ public class BookingMainService implements BookingService{
         if (bookingRepository.existsById(id)) {
             updatedBooking.setId(id);
             Booking result = bookingRepository.save(updatedBooking);
-            logger.info("Car with id {} updated.", id);
+            logger.info("Booking with id {} updated.", id);
             return result;
         }
-        throw new ResourceNotFoundException(String.format("Company with id [%d] not found.", id));
+        throw new ResourceNotFoundException(String.format("Booking with id [%d] not found.", id));
     }
 
     @Override
@@ -45,7 +45,7 @@ public class BookingMainService implements BookingService{
         boolean result = false;
         if (bookingRepository.existsById(bookingId)) {
             bookingRepository.deleteById(bookingId);
-            logger.info("Car with id {} deleted.", bookingId);
+            logger.info("Booking with id {} deleted.", bookingId);
             result = true;
         }
         return result;

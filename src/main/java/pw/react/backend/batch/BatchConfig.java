@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import pw.react.backend.dao.CarRepository;
 import pw.react.backend.dao.UserRepository;
 import pw.react.backend.dao.BookingRepository;
+import pw.react.backend.dao.PaymentRepository;
 
 import pw.react.backend.models.User;
 import pw.react.backend.services.CarMainService;
@@ -16,6 +17,8 @@ import pw.react.backend.services.UserMainService;
 import pw.react.backend.services.UserService;
 import pw.react.backend.services.BookingService;
 import pw.react.backend.services.BookingMainService;
+import pw.react.backend.services.PaymentService;
+import pw.react.backend.services.PaymentMainService;
 
 import javax.sql.DataSource;
 
@@ -42,6 +45,11 @@ public class BatchConfig {
     public BookingService bookingService(BookingRepository bookingRepository)
     {
         return new BookingMainService(bookingRepository);
+    }
+    @Bean
+    public PaymentService paymentService(PaymentRepository paymentRepository)
+    {
+        return new PaymentMainService(paymentRepository);
     }
     @Bean
     public UserService userService(UserRepository userRepository, PasswordEncoder passwordEncoder, BatchRepository<User> userBatchRepository) {
