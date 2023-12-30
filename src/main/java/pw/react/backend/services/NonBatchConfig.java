@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pw.react.backend.dao.BookingRepository;
 import pw.react.backend.dao.CarRepository;
+import pw.react.backend.dao.PaymentRepository;
 import pw.react.backend.dao.UserRepository;
 
 @Profile("!batch")
@@ -25,5 +26,9 @@ public class NonBatchConfig {
     {
         return new BookingMainService(bookingRepository);
     }
-
+    @Bean
+    public PaymentService paymentService(PaymentRepository paymentRepository)
+    {
+        return new PaymentMainService(paymentRepository);
+    }
 }
