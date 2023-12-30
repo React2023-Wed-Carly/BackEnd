@@ -18,12 +18,12 @@ import pw.react.backend.web.CarDto;
 import pw.react.backend.web.UserDto;
 
 import java.util.Collection;
-
+import org.springframework.security.core.Authentication;
 @RestController
 @RequestMapping(path = CarController.CARS_PATH)
 public class CarController {
     public final static String CARS_PATH = "/cars";
-
+    private static final Logger log = LoggerFactory.getLogger(CarController.class);
     @Autowired
     private final CarService carService;
 
@@ -43,8 +43,9 @@ public class CarController {
             )
     })
     @GetMapping(path = "/")
-    public ResponseEntity<Collection<CarDto>> GetOwnersCars(@RequestParam("OwnerID") long ownerID ) {
+    public ResponseEntity<Collection<CarDto>> GetOwnersCars(@RequestParam("OwnerID") long ownerID,Authentication auth ) {
         try {
+            log.info(auth.getName());
             Collection<CarDto> Cars = carService.getByOwnerID(ownerID).stream().map(CarDto::valueFrom).toList();
 
             return ResponseEntity.ok(Cars);

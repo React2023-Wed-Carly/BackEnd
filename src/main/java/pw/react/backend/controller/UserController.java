@@ -11,11 +11,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.exceptions.UserValidationException;
 import pw.react.backend.services.UserService;
 import pw.react.backend.web.UserDto;
 import pw.react.backend.models.User;
 import java.util.Collection;
+import java.util.Optional;
+
+import org.springframework.security.core.Authentication;
+
 
 @RestController
 @RequestMapping(path = UserController.USERS_PATH)
@@ -60,7 +65,7 @@ public class UserController {
             @ApiResponse(
                     responseCode = "200",
                     description = "list of users",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(allOf = UserDto.class))}
+                    content = {@Content(mediaType = "application/json", schema = @Schema(oneOf = UserDto.class))}
             ),
             @ApiResponse(
                     responseCode = "402",
@@ -68,12 +73,14 @@ public class UserController {
             )
     })
     @GetMapping(path = "")
-    public ResponseEntity<Collection<UserDto>> GetUsers() {
+    public ResponseEntity<UserDto> GetUsers(Authentication auth ) {
         try{
-            Collection<UserDto> Usrs=userService.GetAll().stream().filter(User::isAdmin).map(UserDto::valueFrom).toList();
+            Optional<User> usr=userService.FindByUserName(auth.getName());
+            if(usr.isPresent())
+                return ResponseEntity.ok(UserDto.valueFrom(usr.get()));
+            else
+                throw new ResourceNotFoundException("user doesnt exists");
 
-            log.info("Password is not going to be encoded");
-            return ResponseEntity.ok(Usrs);
         } catch (Exception ex) {
             throw new UserValidationException(ex.getMessage(), USERS_PATH);
         }

@@ -13,15 +13,15 @@ public record UserDto(Long id, String username, String password, @Email String e
 
     public static User convertToUser(UserDto userDto) {
         User user = new User();
-        user.setId(userDto.id());
-        user.setUsername(userDto.username());
-        user.setEmail(userDto.email());
-        user.setPassword(userDto.password());
-        user.setBalance(userDto.balance());
-        user.setFirstname(userDto.firstname());
-        user.setLastname(userDto.lastName());
-        user.setAdmin(userDto.isAdmin());
-        user.setDistanceTravelled(userDto.DistanceTravelled());
+        user.setId(userDto.id);
+        user.setUsername(userDto.username);
+        user.setEmail(userDto.email);
+        user.setPassword(userDto.password);
+        user.setBalance(userDto.balance);
+        user.setFirstname(userDto.firstname);
+        user.setLastname(userDto.lastName);
+        user.setAdmin(userDto.isAdmin);
+        user.setDistanceTravelled(userDto.DistanceTravelled);
         return user;
     }
 }

@@ -22,8 +22,8 @@ public class UserMainService implements UserService {
     }
 
     @Override
-    public Optional<User> FindByUserName(User user) {
-        return userRepository.findByUsername(user.getUsername());
+    public Optional<User> FindByUserName(String username) {
+        return userRepository.findByUsername(username);
     }
 
     @Override

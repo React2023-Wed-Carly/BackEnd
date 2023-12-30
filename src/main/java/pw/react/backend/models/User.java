@@ -46,7 +46,7 @@ public class User implements UserDetails {
         return isAdmin;
     }
 
-    public long getBalance() {
+    public Long getBalance() {
         return balance;
     }
 

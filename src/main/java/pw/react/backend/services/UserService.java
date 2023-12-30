@@ -10,5 +10,5 @@ public interface UserService {
     User updatePassword(User user, String password);
     Collection<User> batchSave(Collection<User> users);
     Collection<User> GetAll();
-    Optional<User> FindByUserName(User user);
+    Optional<User> FindByUserName(String username);
 }
