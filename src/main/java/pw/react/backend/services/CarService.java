@@ -12,5 +12,5 @@ public interface CarService {
     Collection<Car> batchSave(Collection<Car> cars);
     Optional<Car> getById(Long carId);
     Collection<Car> getAll();
-    Collection<Car> getByOwnerID(Long id);
+    Collection<Car> getByOwnerId(Long id);
 }

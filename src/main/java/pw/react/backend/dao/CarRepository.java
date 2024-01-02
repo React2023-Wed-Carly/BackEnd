@@ -6,7 +6,7 @@ import pw.react.backend.models.User;
 import java.util.*;
 
 public interface CarRepository extends JpaRepository<Car, Long>{
-    Collection<Car> findCarsByOwnerID(Long OwnerID);
+    Collection<Car> findByOwnerId(Long OwnerId);
 
 }
     

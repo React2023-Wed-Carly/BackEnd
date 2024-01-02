@@ -22,9 +22,9 @@ public class CarMainService implements CarService{
     }
 
     @Override
-    public Collection<Car> getByOwnerID(Long id)
+    public Collection<Car> getByOwnerId(Long id)
     {
-       return carRepository.findCarsByOwnerID(id);
+       return carRepository.findByOwnerId(id);
     }
     @Override
     public Collection<Car> getAll() {

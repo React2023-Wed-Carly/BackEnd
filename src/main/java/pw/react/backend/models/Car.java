@@ -10,7 +10,7 @@ public class Car {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column
-    private Long ownerID;
+    private Long ownerId;
     @Column
     private String brand;
     @Column
@@ -35,12 +35,14 @@ public class Car {
     public void setId(Long id) {
         this.id = id;
     }
-    public Long getOwnerID() {
-        return ownerID;
+
+    public Long getOwnerId() {
+        return ownerId;
     }
-    public void setOwnerID(Long ownerID) {
-        this.ownerID = ownerID;
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
     }
+
     public String getBrand() {
         return brand;
     }

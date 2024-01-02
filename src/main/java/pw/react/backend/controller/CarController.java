@@ -13,11 +13,15 @@ import org.springframework.web.bind.annotation.*;
 import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.exceptions.UserValidationException;
 import pw.react.backend.models.Car;
+import pw.react.backend.models.User;
 import pw.react.backend.services.CarService;
+import pw.react.backend.services.UserService;
 import pw.react.backend.web.CarDto;
 import pw.react.backend.web.UserDto;
 
 import java.util.Collection;
+import java.util.Optional;
+
 import org.springframework.security.core.Authentication;
 @RestController
 @RequestMapping(path = CarController.CARS_PATH)
@@ -26,9 +30,12 @@ public class CarController {
     private static final Logger log = LoggerFactory.getLogger(CarController.class);
     @Autowired
     private final CarService carService;
+    @Autowired
+    private final UserService userService;
 
-    public CarController(CarService carService) {
+    public CarController(CarService carService,UserService userService) {
         this.carService = carService;
+        this.userService=userService;
     }
 @Operation(summary = "get cars by owner id")
     @ApiResponses(value = {
@@ -43,10 +50,19 @@ public class CarController {
             )
     })
     @GetMapping(path = "/")
-    public ResponseEntity<Collection<CarDto>> GetOwnersCars(@RequestParam("OwnerID") long ownerID,Authentication auth ) {
+    public ResponseEntity<Collection<CarDto>> GetOwnersCars(@RequestParam("OwnerId") long ownerId,Authentication auth ) {
         try {
-            log.info(auth.getName());
-            Collection<CarDto> Cars = carService.getByOwnerID(ownerID).stream().map(CarDto::valueFrom).toList();
+
+            Optional<User> us=userService.FindByUserName(auth.getName());
+            if(!us.isPresent())
+                throw  new UserValidationException("cant find user with given token");
+            else
+            {
+                if(us.get().getId()!=ownerId)
+                 throw new UserValidationException("cant access this car, u r not the owner");
+                log.info(us.toString());
+            }
+            Collection<CarDto> Cars = carService.getByOwnerId(ownerId).stream().map(CarDto::valueFrom).toList();
 
             return ResponseEntity.ok(Cars);
 
