@@ -1,8 +1,17 @@
 package pw.react.backend.web;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import pw.react.backend.models.Booking;
-import pw.react.backend.models.Car;
+import pw.react.backend.utils.JsonDateDeserializer;
+import pw.react.backend.utils.JsonDateSerializer;
 
-public record BookingDto(Long id, Long carId, Long userId, String startDate, String endDate,
+import java.time.LocalDate;
+
+public record BookingDto(Long id, Long carId, Long userId,
+                         @JsonDeserialize(using = JsonDateDeserializer.class) @JsonSerialize(using = JsonDateSerializer.class)
+                         LocalDate startDate,
+                         @JsonDeserialize(using = JsonDateDeserializer.class) @JsonSerialize(using = JsonDateSerializer.class)
+                         LocalDate endDate,
                          Boolean completed, Double latitude, Double longitude) {
     public static BookingDto valueFrom(Booking b){
         return new BookingDto(b.getId(), b.getCarId(), b.getUserId(), b.getStartDate(), b.getEndDate(),

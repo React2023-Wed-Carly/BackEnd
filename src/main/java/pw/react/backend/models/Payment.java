@@ -1,7 +1,7 @@
 package pw.react.backend.models;
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table
@@ -12,9 +12,9 @@ public class Payment {
     @Column
     private Long userId;
     @Column
-    private String date; //string czy LocalDateTime?
+    private LocalDate date;
     @Column
-    private Double amount;
+    private Long amount; //w groszach/centach
 
     public Long getId() {
         return id;
@@ -32,19 +32,19 @@ public class Payment {
         this.userId = userId;
     }
 
-    public String getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(String date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
-    public Double getAmount() {
+    public Long getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(Long amount) {
         this.amount = amount;
     }
 }
