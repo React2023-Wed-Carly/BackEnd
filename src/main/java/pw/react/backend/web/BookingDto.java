@@ -5,13 +5,13 @@ import pw.react.backend.models.Booking;
 import pw.react.backend.utils.JsonDateDeserializer;
 import pw.react.backend.utils.JsonDateSerializer;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public record BookingDto(Long id, Long carId, Long userId,
                          @JsonDeserialize(using = JsonDateDeserializer.class) @JsonSerialize(using = JsonDateSerializer.class)
-                         LocalDate startDate,
+                         LocalDateTime startDate,
                          @JsonDeserialize(using = JsonDateDeserializer.class) @JsonSerialize(using = JsonDateSerializer.class)
-                         LocalDate endDate,
+                         LocalDateTime endDate,
                          Boolean completed, Double latitude, Double longitude) {
     public static BookingDto valueFrom(Booking b){
         return new BookingDto(b.getId(), b.getCarId(), b.getUserId(), b.getStartDate(), b.getEndDate(),
