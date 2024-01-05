@@ -29,6 +29,8 @@ public class Car {
     private Double latitude;
     @Column
     private Double longitude;
+    @Column
+    private Integer seatNumber;
     public Long getId() {
         return id;
     }
@@ -76,4 +78,12 @@ public class Car {
     public void setLatitude(Double latitude) { this.latitude = latitude; }
     public Double getLongitude() { return longitude; }
     public void setLongitude(Double longitude) { this.longitude = longitude; }
+
+    public Integer getSeatNumber() {
+        return seatNumber;
+    }
+
+    public void setSeatNumber(Integer seatNumber) {
+        this.seatNumber = seatNumber;
+    }
 }

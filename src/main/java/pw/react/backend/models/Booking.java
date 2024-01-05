@@ -1,7 +1,7 @@
 package pw.react.backend.models;
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table
@@ -14,9 +14,9 @@ public class Booking {
     @Column
     private Long userId;
     @Column
-    private LocalDate startDate;
+    private LocalDateTime startDate;
     @Column
-    private LocalDate endDate;
+    private LocalDateTime endDate;
     @Column
     private Boolean completed;
     @Column
@@ -42,16 +42,16 @@ public class Booking {
     public void setUserId(Long userId) {
         this.userId = userId;
     }
-    public LocalDate getStartDate() {
+    public LocalDateTime getStartDate() {
         return startDate;
     }
-    public void setStartDate(LocalDate startDate) {
+    public void setStartDate(LocalDateTime startDate) {
         this.startDate = startDate;
     }
-    public LocalDate getEndDate() {
+    public LocalDateTime getEndDate() {
         return endDate;
     }
-    public void setEndDate(LocalDate endDate) {
+    public void setEndDate(LocalDateTime endDate) {
         this.endDate = endDate;
     }
     public Boolean getCompleted() {

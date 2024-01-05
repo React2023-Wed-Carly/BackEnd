@@ -5,11 +5,11 @@ import pw.react.backend.models.Payment;
 import pw.react.backend.utils.JsonDateDeserializer;
 import pw.react.backend.utils.JsonDateSerializer;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public record PaymentDto(Long id, Long userId,
                          @JsonDeserialize(using = JsonDateDeserializer.class) @JsonSerialize(using = JsonDateSerializer.class)
-                         LocalDate date, Long amount) {
+                         LocalDateTime date, Long amount) {
     public static PaymentDto valueFrom(Payment p) {
         return new PaymentDto(p.getId(), p.getUserId(), p.getDate(), p.getAmount());
     }
