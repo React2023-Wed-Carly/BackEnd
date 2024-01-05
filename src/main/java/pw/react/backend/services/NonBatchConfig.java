@@ -4,6 +4,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pw.react.backend.dao.BookingRepository;
+import pw.react.backend.dao.CarImageRepository;
 import pw.react.backend.dao.CarRepository;
 import pw.react.backend.dao.PaymentRepository;
 import pw.react.backend.dao.UserRepository;
@@ -30,5 +31,10 @@ public class NonBatchConfig {
     public PaymentService paymentService(PaymentRepository paymentRepository)
     {
         return new PaymentMainService(paymentRepository);
+    }
+    @Bean
+    public ImageService imageService(CarImageRepository carImageRepository)
+    {
+        return new CarImageService(carImageRepository);
     }
 }

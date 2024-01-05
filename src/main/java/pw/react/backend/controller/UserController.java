@@ -29,7 +29,7 @@ public class UserController {
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
     static final String USERS_PATH = "/users";
 
-    @Autowired
+
     private final UserService userService;
 
     public UserController(UserService userService) {
@@ -65,7 +65,7 @@ public class UserController {
             @ApiResponse(
                     responseCode = "200",
                     description = "list of users",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(oneOf = UserDto.class))}
+                    content = {@Content(mediaType = "application/json", schema = @Schema(allOf = UserDto.class))}
             ),
             @ApiResponse(
                     responseCode = "402",

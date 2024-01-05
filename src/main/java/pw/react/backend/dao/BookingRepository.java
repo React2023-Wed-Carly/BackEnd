@@ -7,4 +7,6 @@ import pw.react.backend.models.Booking;
 import java.util.*;
 public interface BookingRepository extends JpaRepository<Booking, Long>{
     Collection<Booking> findByCarId(Long carId);
+
+
 }
