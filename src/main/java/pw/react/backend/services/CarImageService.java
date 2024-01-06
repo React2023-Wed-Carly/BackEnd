@@ -22,9 +22,8 @@ public class CarImageService implements ImageService{
     @Override
     public CarImage getCarImage(long carId) {
         return repository.findCarImageByCarId(carId)
-                .orElseThrow(() -> new ResourceNotFoundException("File not found with carid " + carId));
+                .orElse(null);
     }
-
     @Override
     public CarImage sotreImage(long carId, MultipartFile file) {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());

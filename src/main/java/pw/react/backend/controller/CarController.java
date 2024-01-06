@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,8 +28,7 @@ import pw.react.backend.web.CarDto;
 import pw.react.backend.web.UploadFileResponse;
 import pw.react.backend.web.UserDto;
 
-import java.util.Collection;
-import java.util.Optional;
+import java.util.*;
 
 import org.springframework.security.core.Authentication;
 @RestController
@@ -56,7 +57,7 @@ public class CarController {
         CarImage carImage = carImageService.sotreImage(carId, file);
 
         String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/companies/" + carId + "/logo/")
+                .path("/cars/" + carId + "/image/")
                 .path(carImage.getFileName())
                 .toUriString();
         UploadFileResponse response = new UploadFileResponse(
@@ -68,10 +69,13 @@ public class CarController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
     @GetMapping(value = "/{carId}/image", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public @ResponseBody byte[] getImg(@RequestHeader HttpHeaders headers, @PathVariable Long carId) {
+    public ResponseEntity<Resource> getImg(@RequestHeader HttpHeaders headers, @PathVariable Long carId) {
 
         CarImage carImage = carImageService.getCarImage(carId);
-        return carImage.getData();
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(carImage.getFileType()))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + carImage.getFileName() + "\"")
+                .body(new ByteArrayResource(carImage.getData()));
     }
 @Operation(summary = "get cars by owner id")
     @ApiResponses(value = {
@@ -86,21 +90,33 @@ public class CarController {
             )
     })
     @GetMapping(path = "/")
-    public ResponseEntity<Collection<CarDto>> GetOwnersCars(@RequestParam("OwnerId") long ownerId,Authentication auth ) {
+    public ResponseEntity<Collection<Map<String,Object>>> GetOwnersCars(@RequestParam("OwnerId") long ownerId, Authentication auth ) {
         try {
 
-            Optional<User> us=userService.FindByUserName(auth.getName());
-            if(!us.isPresent())
-                throw  new UserValidationException("cant find user with given token");
-            else
+            User us=userService.FindByUserName(auth.getName()).orElseThrow(
+                    ()->new UserValidationException("cant find user with given token"));
+
             {
-                if(us.get().getId()!=ownerId)
+                if(us.getId()!=ownerId)
                  throw new UserValidationException("cant access this car, u r not the owner");
-                log.info(us.toString());
+
             }
             Collection<CarDto> Cars = carService.getByOwnerId(ownerId).stream().map(CarDto::valueFrom).toList();
+            List<Map<String,Object>> CarImgList=new ArrayList<>();
 
-            return ResponseEntity.ok(Cars);
+            for (CarDto c:Cars) {
+                Map resp=new HashMap();
+                CarImage img=carImageService.getCarImage(c.id());
+                byte[] bytes;
+                if(img!=null)
+                    bytes=img.getData();
+                else
+                    bytes=null;
+                resp.put("info",c);
+                resp.put("img",bytes);
+                CarImgList.add(resp);
+            }
+            return ResponseEntity.ok(CarImgList);
 
         } catch (Exception ex) {
             throw new ResourceNotFoundException(ex.getMessage()+" "+CarController.CARS_PATH);
