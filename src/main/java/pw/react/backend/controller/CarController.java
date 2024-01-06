@@ -77,50 +77,41 @@ public class CarController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + carImage.getFileName() + "\"")
                 .body(new ByteArrayResource(carImage.getData()));
     }
-@Operation(summary = "get cars by owner id")
+@Operation(summary = "get all car info by id, includes info- with all fields and img with car image in binary")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
                     description = "ok",
-                    content = {@Content(mediaType = "application/json", schema = @Schema(allOf = CarDto.class))}
+                    content = {@Content(mediaType = "application/json", schema = @Schema(oneOf = Map.class))}
             ),
             @ApiResponse(
                     responseCode = "402",
                     description = "Something went wrong"
             )
     })
-    @GetMapping(path = "/")
-    public ResponseEntity<Collection<Map<String,Object>>> GetOwnersCars(@RequestParam("OwnerId") long ownerId, Authentication auth ) {
+    @GetMapping(path = "/{carId}")
+    public ResponseEntity<Map<String,Object>> GetCarInfo(@PathVariable("carId") long carId, Authentication auth ) {
         try {
 
             User us=userService.FindByUserName(auth.getName()).orElseThrow(
                     ()->new UserValidationException("cant find user with given token"));
 
-            {
-                if(us.getId()!=ownerId)
-                 throw new UserValidationException("cant access this car, u r not the owner");
+            CarDto car=CarDto.valueFrom(carService.getById(carId).orElseThrow(
+                    ()->new ResourceNotFoundException("car with given id doesnt exist")));
 
-            }
-            Collection<CarDto> Cars = carService.getByOwnerId(ownerId).stream().map(CarDto::valueFrom).toList();
-            List<Map<String,Object>> CarImgList=new ArrayList<>();
-
-            for (CarDto c:Cars) {
-                Map resp=new HashMap();
-                CarImage img=carImageService.getCarImage(c.id());
+                CarImage img=carImageService.getCarImage(car.id());
                 byte[] bytes;
                 if(img!=null)
                     bytes=img.getData();
                 else
                     bytes=null;
-                resp.put("info",c);
+                Map<String,Object> resp=new HashMap<>();
+                resp.put("info",car);
                 resp.put("img",bytes);
-                CarImgList.add(resp);
+            return ResponseEntity.ok(resp);
             }
-            return ResponseEntity.ok(CarImgList);
-
-        } catch (Exception ex) {
+         catch (Exception ex) {
             throw new ResourceNotFoundException(ex.getMessage()+" "+CarController.CARS_PATH);
         }
     }
-
 }

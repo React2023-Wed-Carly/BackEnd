@@ -3,11 +3,7 @@ package pw.react.backend.services;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import pw.react.backend.dao.BookingRepository;
-import pw.react.backend.dao.CarImageRepository;
-import pw.react.backend.dao.CarRepository;
-import pw.react.backend.dao.PaymentRepository;
-import pw.react.backend.dao.UserRepository;
+import pw.react.backend.dao.*;
 
 @Profile("!batch")
 public class NonBatchConfig {
@@ -22,6 +18,7 @@ public class NonBatchConfig {
     public UserService userService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return new UserMainService(userRepository, passwordEncoder);
     }
+
     @Bean
     public BookingService bookingService(BookingRepository bookingRepository)
     {
@@ -31,6 +28,11 @@ public class NonBatchConfig {
     public PaymentService paymentService(PaymentRepository paymentRepository)
     {
         return new PaymentMainService(paymentRepository);
+    }
+    @Bean
+    public FavoriteCarService favoriteCarService(FavoriteCarsRepository favoriteCarsRepository)
+    {
+        return new FavoriteCarMainService(favoriteCarsRepository);
     }
     @Bean
     public ImageService imageService(CarImageRepository carImageRepository)

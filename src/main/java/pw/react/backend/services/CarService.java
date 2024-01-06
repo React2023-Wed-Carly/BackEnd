@@ -4,6 +4,7 @@ import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.models.Car;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 public interface CarService {
@@ -13,4 +14,5 @@ public interface CarService {
     Optional<Car> getById(Long carId);
     Collection<Car> getAll();
     Collection<Car> getByOwnerId(Long id);
+    Collection<Car> getbyIdIn(List<Long> ids);
 }

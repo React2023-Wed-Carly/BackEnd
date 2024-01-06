@@ -9,20 +9,20 @@ public class FavoriteCars {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column
-    private Long UserId;
+    private Long userId;
     @Column
-    private Long CarId;
+    private Long carId;
 
     public Long getId() {
         return id;
     }
 
     public Long getUserId() {
-        return UserId;
+        return userId;
     }
 
     public Long getCarId() {
-        return CarId;
+        return carId;
     }
 
     public void setId(Long id) {
@@ -30,10 +30,10 @@ public class FavoriteCars {
     }
 
     public void setUserId(Long userId) {
-        UserId = userId;
+        this.userId = userId;
     }
 
     public void setCarId(Long carId) {
-        CarId = carId;
+        this.carId = carId;
     }
 }

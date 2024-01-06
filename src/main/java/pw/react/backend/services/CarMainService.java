@@ -10,6 +10,7 @@ import pw.react.backend.models.User;
 import pw.react.backend.models.Car;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import pw.react.backend.dao.CarRepository;
 public class CarMainService implements CarService{
@@ -60,6 +61,11 @@ public class CarMainService implements CarService{
             logger.warn("Cars collection is empty or null.");
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public Collection<Car> getbyIdIn(List<Long> ids) {
+        return carRepository.findAllByIdIn(ids);
     }
 
     @Override
