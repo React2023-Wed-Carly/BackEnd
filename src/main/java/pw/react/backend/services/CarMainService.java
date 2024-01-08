@@ -2,6 +2,9 @@ package pw.react.backend.services;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import pw.react.backend.exceptions.ResourceNotFoundException;
@@ -15,7 +18,7 @@ import java.util.Optional;
 import pw.react.backend.dao.CarRepository;
 public class CarMainService implements CarService{
     private static final Logger logger = LoggerFactory.getLogger(CarMainService.class);
-
+    private static final int PAGE_SIZE=20;
     protected final CarRepository carRepository;
     public CarMainService(CarRepository carRepository)
     {
@@ -32,14 +35,13 @@ public class CarMainService implements CarService{
         return carRepository.findAll();
     }
     @Override
-    public Car updateCar(Long id, Car updatedCar) throws ResourceNotFoundException {
-        if (carRepository.existsById(id)) {
+    public Car updateCar(Long id, Car updatedCar) {
+        if (carRepository.existsById(id))
             updatedCar.setId(id);
-            Car result = carRepository.save(updatedCar);
-            logger.info("Car with id {} updated.", id);
-            return result;
-        }
-        throw new ResourceNotFoundException(String.format("Car with id [%d] not found.", id));
+        Car result = carRepository.save(updatedCar);
+        logger.info("Car with id {} updated.", id);
+        return result;
+
     }
 
     @Override
@@ -64,8 +66,9 @@ public class CarMainService implements CarService{
     }
 
     @Override
-    public Collection<Car> getbyIdIn(List<Long> ids) {
-        return carRepository.findAllByIdIn(ids);
+    public Collection<Car> getbyIdIn(List<Long> ids,int page) {
+        Pageable pageable= PageRequest.of(page,PAGE_SIZE);
+        return carRepository.findAllByIdIn(ids,pageable);
     }
 
     @Override

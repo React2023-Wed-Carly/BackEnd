@@ -15,16 +15,13 @@ import org.springframework.web.bind.annotation.*;
 import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.exceptions.UserValidationException;
 import pw.react.backend.models.Car;
-import pw.react.backend.services.CarMainService;
-import pw.react.backend.services.CarService;
-import pw.react.backend.services.FavoriteCarService;
-import pw.react.backend.services.UserService;
+import pw.react.backend.models.CarImage;
+import pw.react.backend.services.*;
+import pw.react.backend.web.CarDto;
 import pw.react.backend.web.UserDto;
 import pw.react.backend.models.User;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
 
 import org.springframework.security.core.Authentication;
 
@@ -42,12 +39,19 @@ public class UserController {
     private final UserService userService;
     private final CarService carService;
     private final FavoriteCarService favoriteCarService;
+    private ImageService carImageService;
 
     public UserController(UserService userService,CarService carService,FavoriteCarService favoriteCarService) {
         this.userService = userService;
         this.carService=carService;
         this.favoriteCarService=favoriteCarService;
     }
+    @Autowired
+    public void setCarImageService(ImageService carImageService)
+    {
+        this.carImageService=carImageService;
+    }
+
 
 
     @Operation(summary = "Create new user")
@@ -130,8 +134,21 @@ public class UserController {
             throw new UserValidationException(ex.getMessage(),USERS_PATH+"/favorites");
         }
     }
+    @Operation(summary = "get favorite cars, the same schema as in getting cars")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "favorite cars",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(oneOf = Map.class))}
+
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Something went wrong"
+            )
+    })
     @GetMapping("/favorites")
-    public ResponseEntity<Object> getFavorites(Authentication auth)
+    public ResponseEntity<List<Map<String,Object>>> getFavorites(Authentication auth,@RequestParam("page") int page)
     {
         try
         {
@@ -140,12 +157,24 @@ public class UserController {
 
             List<Long> carids=favoriteCarService.getAllbyUser(us.getId()).stream()
                     .map((favoriteCars -> favoriteCars.getCarId())).toList();
-            Collection<Car> cars=carService.getbyIdIn(carids);
-            for (Car c:cars
+
+            Collection<CarDto> cars=carService.getbyIdIn(carids,page).stream().map(CarDto::valueFrom).toList();
+            List<Map<String,Object>> resp=new LinkedList<>();
+            for (CarDto c:cars
             ) {
-                log.info(c.getId().toString());
+                Map<String,Object>obj=new HashMap<>();
+                CarImage img=carImageService.getCarImage(c.id());
+                byte[] bytes;
+                if(img!=null)
+                    bytes=img.getData();
+                else
+                    bytes=null;
+
+                obj.put("info",c);
+                obj.put("img",bytes);
+                resp.add(obj);
             }
-            return ResponseEntity.ok(null);
+            return ResponseEntity.ok(resp);
         }
         catch (Exception ex)
         {

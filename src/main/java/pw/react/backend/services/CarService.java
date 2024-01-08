@@ -14,5 +14,5 @@ public interface CarService {
     Optional<Car> getById(Long carId);
     Collection<Car> getAll();
     Collection<Car> getByOwnerId(Long id);
-    Collection<Car> getbyIdIn(List<Long> ids);
+    Collection<Car> getbyIdIn(List<Long> ids,int page);
 }

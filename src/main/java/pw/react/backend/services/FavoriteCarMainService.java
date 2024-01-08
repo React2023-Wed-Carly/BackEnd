@@ -18,7 +18,7 @@ public class FavoriteCarMainService implements FavoriteCarService{
     }
     @Override
     public Collection<FavoriteCars> getAllbyUser(Long userId) {
-        return favoriteCarsRepository.findAllByUserId(userId);
+        return favoriteCarsRepository.findAllByUserIdOrderByIdDesc(userId);
     }
 
     @Override
