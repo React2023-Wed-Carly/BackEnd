@@ -5,20 +5,10 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import pw.react.backend.dao.CarRepository;
-import pw.react.backend.dao.UserRepository;
-import pw.react.backend.dao.BookingRepository;
-import pw.react.backend.dao.PaymentRepository;
+import pw.react.backend.dao.*;
 
 import pw.react.backend.models.User;
-import pw.react.backend.services.CarMainService;
-import pw.react.backend.services.CarService;
-import pw.react.backend.services.UserMainService;
-import pw.react.backend.services.UserService;
-import pw.react.backend.services.BookingService;
-import pw.react.backend.services.BookingMainService;
-import pw.react.backend.services.PaymentService;
-import pw.react.backend.services.PaymentMainService;
+import pw.react.backend.services.*;
 
 import javax.sql.DataSource;
 
@@ -50,6 +40,16 @@ public class BatchConfig {
     public PaymentService paymentService(PaymentRepository paymentRepository)
     {
         return new PaymentMainService(paymentRepository);
+    }
+    @Bean
+    public ImageService imageService(CarImageRepository carImageRepository)
+    {
+        return new CarImageService(carImageRepository);
+    }
+    @Bean
+    public FavoriteCarService favoriteCarService(FavoriteCarsRepository favoriteCarRepository)
+    {
+        return new FavoriteCarMainService(favoriteCarRepository);
     }
     @Bean
     public UserService userService(UserRepository userRepository, PasswordEncoder passwordEncoder, BatchRepository<User> userBatchRepository) {

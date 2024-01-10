@@ -30,7 +30,15 @@ public class Car {
     @Column
     private Double longitude;
     @Column
-    private Integer seatNumber;
+    private String fuelType;
+    @Column
+    private String transmission;
+    @Column
+    private String licensePlateNumber;
+    @Column
+    private String features; //comma separated string
+    @Column
+    private Integer seatingCapacity;
     public Long getId() {
         return id;
     }
@@ -79,11 +87,43 @@ public class Car {
     public Double getLongitude() { return longitude; }
     public void setLongitude(Double longitude) { this.longitude = longitude; }
 
-    public Integer getSeatNumber() {
-        return seatNumber;
+    public Integer getSeatingCapacity() {
+        return seatingCapacity;
     }
 
-    public void setSeatNumber(Integer seatNumber) {
-        this.seatNumber = seatNumber;
+    public void setSeatingCapacity(Integer seatingCapacity) {
+        this.seatingCapacity = seatingCapacity;
+    }
+
+    public String getFuelType() {
+        return fuelType;
+    }
+
+    public void setFuelType(String fuelType) {
+        this.fuelType = fuelType;
+    }
+
+    public String getTransmission() {
+        return transmission;
+    }
+
+    public void setTransmission(String transmission) {
+        this.transmission = transmission;
+    }
+
+    public String getLicensePlateNumber() {
+        return licensePlateNumber;
+    }
+
+    public void setLicensePlateNumber(String licensePlateNumber) {
+        this.licensePlateNumber = licensePlateNumber;
+    }
+
+    public String getFeatures() {
+        return features;
+    }
+
+    public void setFeatures(String features) {
+        this.features = features;
     }
 }
