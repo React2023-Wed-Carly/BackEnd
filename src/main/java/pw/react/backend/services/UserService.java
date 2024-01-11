@@ -11,4 +11,5 @@ public interface UserService {
     Collection<User> batchSave(Collection<User> users);
     Collection<User> GetAll();
     Optional<User> FindByUserName(String username);
+    User saveEdited(User user);
 }

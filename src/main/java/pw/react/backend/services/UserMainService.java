@@ -48,7 +48,12 @@ public class UserMainService implements UserService {
         }
         return user;
     }
-
+    @Override
+    public User saveEdited(User user)
+    {
+        userRepository.save(user);
+        return user;
+    }
     private boolean isValidUser(User user) {
         if (user != null) {
             if (isValid(user.getUsername())) {

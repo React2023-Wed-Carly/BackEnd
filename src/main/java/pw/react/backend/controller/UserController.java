@@ -51,9 +51,58 @@ public class UserController {
     {
         this.carImageService=carImageService;
     }
-
-
-
+    @Operation(summary = "get all user details")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "User details sent",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(oneOf = UserDto.class))}
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Something went wrong"
+            )
+    })
+    @GetMapping("/details")
+    public ResponseEntity<UserDto> UserDetails(Authentication auth)
+    {
+        try{
+            User us=userService.FindByUserName(auth.getName())
+                    .orElseThrow(()->new ResourceNotFoundException("couldnt find user"));
+            return ResponseEntity.ok(UserDto.valueFrom(us));
+        }
+        catch (Exception exception)
+        {
+            throw new ResourceNotFoundException(exception.getMessage());
+        }
+    }
+    @Operation(summary = "top up user account by given amount")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "amount added to account"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Something went wrong"
+            )
+    })
+    @PostMapping("/details/Topup")
+    public ResponseEntity<Void> TopUpAccount(@RequestParam("amount") Long amount,Authentication auth)
+    {
+        try{
+            User us=userService.FindByUserName(auth.getName())
+                    .orElseThrow(()->new ResourceNotFoundException("couldnt find user"));
+            Long oldBalance=us.getBalance();
+            us.setBalance(oldBalance+amount);
+            userService.saveEdited(us);
+            return new ResponseEntity<Void>(HttpStatus.OK);
+        }
+        catch (Exception ex)
+        {
+            throw new ResourceNotFoundException(ex.getMessage());
+        }
+    }
     @Operation(summary = "Create new user")
     @ApiResponses(value = {
             @ApiResponse(
@@ -90,15 +139,12 @@ public class UserController {
             )
     })
     @PostMapping("/favorites/")
-
     public ResponseEntity<Void> AddFavorite(@RequestParam("carId") Long carId,Authentication auth)
-    {
+        {
         try
         {
             User us=userService.FindByUserName(auth.getName()).orElseThrow(
                     ()->new ResourceNotFoundException("user doesnt exists"));
-            if(us.getId()==1L)
-                log.info(us.getId().toString());
             favoriteCarService.AddFavorite(us.getId(),carId);
             return new ResponseEntity<Void>(HttpStatus.CREATED);
         }
