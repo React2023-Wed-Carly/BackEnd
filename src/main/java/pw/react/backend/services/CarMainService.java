@@ -9,6 +9,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.exceptions.UserValidationException;
+import pw.react.backend.models.FavoriteCars;
 import pw.react.backend.models.User;
 import pw.react.backend.models.Car;
 import java.util.Collection;
@@ -75,5 +76,15 @@ public class CarMainService implements CarService{
     public Optional<Car> getById(Long carId) {
         return carRepository.findById(carId);
     }
-
+    @Override
+    public Car save(Car car) {
+        if (car != null) {
+            car = carRepository.save(car);
+        }
+        return car;
+    }
+    @Override
+    public Collection<Car> getAllbyOwner(Long ownerId) {
+        return carRepository.findAllByOwnerIdOrderByIdDesc(ownerId);
+    }
 }
