@@ -118,7 +118,9 @@ public class UserController {
     @PostMapping(path = "")
     public ResponseEntity<UserDto> createUser(@RequestBody UserDto user) {
         try {
-            User us= userService.validateAndSave(UserDto.convertToUser(user));
+            User us=UserDto.convertToUser(user);
+            us.setAdmin(false);
+             us= userService.validateAndSave(us);
             if(us==null)
                 throw new UserValidationException("username already exists");
             log.info("Password is not going to be encoded");
