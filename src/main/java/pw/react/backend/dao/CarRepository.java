@@ -10,6 +10,6 @@ import java.util.*;
 public interface CarRepository extends JpaRepository<Car, Long>{
     Collection<Car> findByOwnerId(Long OwnerId);
     List<Car> findAllByIdIn(List<Long> ids, Pageable pageable);
-    Collection<Car> findAllByOwnerIdOrderByIdDesc(Long ownerId);
+    List<Car> findAllByOwnerIdOrderByIdDesc(Long ownerId,Pageable pageable);
 }
     

@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pw.react.backend.exceptions.ResourceNotFoundException;
+import pw.react.backend.exceptions.UnauthorizedException;
 import pw.react.backend.exceptions.UserValidationException;
 import pw.react.backend.models.Car;
 import pw.react.backend.models.CarImage;
@@ -69,7 +70,11 @@ public class ManageController {
             )
     })
     @PostMapping(path = "/cars")
-    public ResponseEntity<CarDto> createCar(@RequestBody CarDto carInput) {
+    public ResponseEntity<CarDto> createCar(@RequestBody CarDto carInput,Authentication auth) {
+        User us=userService.FindByUserName(auth.getName()).orElseThrow(
+                ()->new ResourceNotFoundException("user doesnt exists"));
+        if(!us.isAdmin())
+            throw  new UnauthorizedException("only admin can access",MANAGE_PATH+"/cars");
         try {
             Car car=CarDto.ConvertToCar(carInput);
             car= carService.save(car);
@@ -81,7 +86,12 @@ public class ManageController {
         }
     }
     @DeleteMapping(path = "/cars/{carId}")
-    public ResponseEntity<String> deleteCar(@RequestHeader HttpHeaders headers, @PathVariable Long carId) {
+    public ResponseEntity<String> deleteCar(@RequestHeader HttpHeaders headers, @PathVariable Long carId,Authentication auth) {
+        Car car=carService.getById(carId).orElseThrow(()->new ResourceNotFoundException("car with given id doesnt exists"));
+        User us=userService.FindByUserName(auth.getName()).orElseThrow(
+                ()->new ResourceNotFoundException("user doesnt exists"));
+        if(!us.isAdmin()||us.getId()!=car.getOwnerId())
+            throw  new UnauthorizedException("only admin of given car can access",MANAGE_PATH+"/cars");
         boolean deleted = carService.deleteCar(carId);
         if (!deleted) {
             return ResponseEntity.badRequest().body(String.format("Car with id %s does not exist.", carId));
@@ -91,7 +101,11 @@ public class ManageController {
     @PutMapping(path = "/cars/{carId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateCar(@RequestHeader HttpHeaders headers, @PathVariable Long carId,
-                              @Valid @RequestBody CarDto updatedCar) {
+                              @Valid @RequestBody CarDto updatedCar,Authentication auth) {
+        User us=userService.FindByUserName(auth.getName()).orElseThrow(
+                ()->new ResourceNotFoundException("user doesnt exists"));
+        if(!us.isAdmin()||us.getId()!=updatedCar.ownerId())
+            throw  new UnauthorizedException("only admin can access",MANAGE_PATH+"/cars");
         carService.updateCar(carId, CarDto.ConvertToCar(updatedCar));
     }
 
@@ -126,15 +140,14 @@ public class ManageController {
     @GetMapping("/cars")
     public ResponseEntity<List<Map<String,Object>>> getAllCars(Authentication auth,@RequestParam("page") int page)
     {
+        User us=userService.FindByUserName(auth.getName()).orElseThrow(
+                ()->new ResourceNotFoundException("user doesnt exists"));
+        if(!us.isAdmin())
+            throw  new UnauthorizedException("only admin can access",MANAGE_PATH+"/cars");
         try
         {
-            User us=userService.FindByUserName(auth.getName()).orElseThrow(
-                    ()->new ResourceNotFoundException("user doesnt exists"));
 
-            List<Long> carids=carService.getAllbyOwner(us.getId()).stream()
-                    .map((cars -> cars.getId())).toList();
-
-            Collection<CarDto> cars=carService.getbyIdIn(carids,page).stream().map(CarDto::valueFrom).toList();
+            List<CarDto> cars=carService.getAllbyOwner(us.getId(),page).stream().map(CarDto::valueFrom).toList();
             List<Map<String,Object>> resp=new LinkedList<>();
             for (CarDto c:cars
             ) {

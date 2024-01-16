@@ -84,7 +84,8 @@ public class CarMainService implements CarService{
         return car;
     }
     @Override
-    public Collection<Car> getAllbyOwner(Long ownerId) {
-        return carRepository.findAllByOwnerIdOrderByIdDesc(ownerId);
+    public Collection<Car> getAllbyOwner(Long ownerId,int nr) {
+        Pageable pageable=PageRequest.of(nr,20);
+        return carRepository.findAllByOwnerIdOrderByIdDesc(ownerId,pageable);
     }
 }

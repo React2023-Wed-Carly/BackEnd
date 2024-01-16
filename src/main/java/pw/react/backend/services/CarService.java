@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CarService {
-    Collection<Car> getAllbyOwner(Long ownerId);
+    Collection<Car> getAllbyOwner(Long ownerId,int nr);
     Car updateCar(Long id, Car updatedCar) throws ResourceNotFoundException;
     boolean deleteCar(Long carId);
     Collection<Car> batchSave(Collection<Car> cars);
