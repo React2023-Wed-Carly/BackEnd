@@ -49,34 +49,7 @@ public class CarController {
         this.carService = carService;
         this.userService=userService;
     }
-    @PostMapping(path ="/{carId}/image")
-    public  ResponseEntity<UploadFileResponse> uploadLogo(@RequestHeader HttpHeaders headers,
-                                                                @PathVariable Long carId,
-                                                                @RequestParam("file") MultipartFile file) {
 
-        CarImage carImage = carImageService.sotreImage(carId, file);
-
-        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/cars/" + carId + "/image/")
-                .path(carImage.getFileName())
-                .toUriString();
-        UploadFileResponse response = new UploadFileResponse(
-                carImage.getFileName(),
-                fileDownloadUri,
-                file.getContentType(),
-                file.getSize()
-        );
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-    @GetMapping(value = "/{carId}/image", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<Resource> getImg(@RequestHeader HttpHeaders headers, @PathVariable Long carId) {
-
-        CarImage carImage = carImageService.getCarImage(carId);
-        return ResponseEntity.ok()
-                .contentType(MediaType.parseMediaType(carImage.getFileType()))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + carImage.getFileName() + "\"")
-                .body(new ByteArrayResource(carImage.getData()));
-    }
 @Operation(summary = "get all car info by id, includes info- with all fields and img with car image in binary")
     @ApiResponses(value = {
             @ApiResponse(

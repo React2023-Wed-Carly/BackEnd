@@ -30,8 +30,10 @@ import pw.react.backend.services.*;
 import pw.react.backend.web.*;
 import pw.react.backend.models.User;
 
-import java.util.*;
 
+import java.time.Duration;
+import java.util.*;
+import java.time.temporal.ChronoUnit.*;
 import org.springframework.security.core.Authentication;
 
 import javax.swing.text.html.parser.Entity;
@@ -115,32 +117,62 @@ public class ManageController {
     }
 
     @PostMapping(path ="/cars/{carId}/image")
-    public  ResponseEntity<UploadFileResponse> uploadLogo(@RequestHeader HttpHeaders headers,
+    public  ResponseEntity<UploadFileResponse> uploadLogo(Authentication auth,@RequestHeader HttpHeaders headers,
                                                           @PathVariable Long carId,
                                                           @RequestParam("file") MultipartFile file) {
+        try {
+            User us = userService.FindByUserName(auth.getName())
+                    .orElseThrow(() -> new ResourceNotFoundException("user doesnt exists"));
+            Car car = carService.getById(carId).orElseThrow(() -> new ResourceNotFoundException("car doest exists"));
+            if (!us.isAdmin() || car.getOwnerId() != us.getId())
+                throw new IllegalAccessException("cant access this car ");
 
-        CarImage carImage = carImageService.sotreImage(carId, file);
+            CarImage carImage = carImageService.sotreImage(carId, file);
 
-        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/cars/" + carId + "/image/")
-                .path(carImage.getFileName())
-                .toUriString();
-        UploadFileResponse response = new UploadFileResponse(
-                carImage.getFileName(),
-                fileDownloadUri,
-                file.getContentType(),
-                file.getSize()
-        );
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
+                    .path("/cars/" + carId + "/image/")
+                    .path(carImage.getFileName())
+                    .toUriString();
+            UploadFileResponse response = new UploadFileResponse(
+                    carImage.getFileName(),
+                    fileDownloadUri,
+                    file.getContentType(),
+                    file.getSize()
+
+            );
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        }
+        catch (Exception ex)
+        {
+            throw new UserValidationException(ex.getMessage(),MANAGE_PATH+"/cars");
+        }
     }
     @GetMapping(value = "/cars/{carId}/image", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
-    public ResponseEntity<Resource> getImg(@RequestHeader HttpHeaders headers, @PathVariable Long carId) {
+    public ResponseEntity<Resource> getImg(Authentication auth,@RequestHeader HttpHeaders headers, @PathVariable Long carId) {
+        try {
+            User us = userService.FindByUserName(auth.getName())
+                    .orElseThrow(() -> new ResourceNotFoundException("user doesnt exists"));
+            Car car = carService.getById(carId).orElseThrow(() -> new ResourceNotFoundException("car doest exists"));
+            if (!us.isAdmin() || car.getOwnerId() != us.getId())
+                throw new IllegalAccessException("cant access this car ");
 
-        CarImage carImage = carImageService.getCarImage(carId);
+
+            CarImage carImage = carImageService.getCarImage(carId);
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(carImage.getFileType()))
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + carImage.getFileName() + "\"")
                 .body(new ByteArrayResource(carImage.getData()));
+        }
+        catch (Exception ex)
+        {
+            throw new UserValidationException(ex.getMessage(),MANAGE_PATH+"/cars");
+        }
+    }
+    @DeleteMapping(value = "/{carId}/image")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void removeimage(@RequestHeader HttpHeaders headers, @PathVariable Long carId) {
+
+        carImageService.deleteCarImage(carId);
     }
     @GetMapping("/cars")
     public ResponseEntity<List<Map<String,Object>>> getAllCars(Authentication auth,@RequestParam("page") int page)
@@ -222,6 +254,13 @@ public class ManageController {
             Car car=carService.getById(booking.getCarId()).orElseThrow(()->new ResourceNotFoundException("car with given id doesnt exists"));
             if(car.getOwnerId()!=us.getId())
                 throw new UnauthorizedException("Admin can only edit his own cars",MANAGE_PATH);
+            long days= Duration.between(booking.getEndDate(), booking.getStartDate()).toDays();
+            Long cost=car.getDailyPrice()*days;
+            User user=userService.findById(booking.getUserId()).orElseThrow(()->new ResourceNotFoundException("invalid booking"));
+            Long prev=user.getBalance();
+            user.setBalance(prev+cost);
+            userService.saveEdited(user);
+
              boolean b=bookingService.deleteBooking(bookingid);
              if(b)
                  return ResponseEntity.ok(null);
@@ -245,33 +284,6 @@ public class ManageController {
                     .toList();
             return ResponseEntity.ok(paymentDtos);
 
-        }
-        catch (Exception ex)
-        {
-            throw new UserValidationException(ex.getMessage(),MANAGE_PATH+"/bookings");
-        }
-    }
-    @PostMapping("/users")
-    ResponseEntity<UserDto> updateUser(Authentication auth,@RequestBody UserDto userDto)
-    {
-        User us=userService.FindByUserName(auth.getName()).orElseThrow(()->new ResourceNotFoundException("user doesnt exists"));
-        if(!us.isAdmin())
-            throw new UnauthorizedException("only admins can access this endpoint",MANAGE_PATH);
-        try
-        {
-          User user=UserDto.convertToUser(userDto);
-
-          User OGuser=userService.findById(userDto.id()).orElseThrow(()->new ResourceNotFoundException(
-                  "user with given id doesnt exists"
-          ));
-          if(OGuser.isAdmin())
-              throw  new IllegalAccessException("cant edit other admins");
-
-          userService.saveEdited(user);
-          if(userDto.password()!=null)
-            userService.updatePassword(user,userDto.password());
-
-          return ResponseEntity.ok(UserDto.valueFrom(user));
         }
         catch (Exception ex)
         {
