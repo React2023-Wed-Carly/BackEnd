@@ -2,6 +2,8 @@ package pw.react.backend.services;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pw.react.backend.dao.BookingRepository;
 import pw.react.backend.dao.CarRepository;
@@ -65,5 +67,11 @@ public class PaymentMainService implements PaymentService {
     @Override
     public Optional<Payment> getById(Long paymentId) {
         return paymentRepository.findById(paymentId);
+    }
+
+    @Override
+    public Collection<Payment> getAllOrderedByDate(int page) {
+        Pageable pageable =PageRequest.of(page,20);
+        return paymentRepository.findAllByOrderByDate(pageable);
     }
 }

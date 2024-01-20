@@ -2,6 +2,8 @@ package pw.react.backend.services;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pw.react.backend.dao.UserRepository;
 import pw.react.backend.exceptions.UserValidationException;
@@ -94,6 +96,12 @@ public class UserMainService implements UserService {
     }
 
     @Override
+    public Collection<User> GetAllNonAdmin(int page) {
+        Pageable pageable= PageRequest.of(page,20);
+        return userRepository.findAllByIsAdminOrderById(Boolean.FALSE,pageable);
+    }
+
+    @Override
     public Collection<User> batchSave(Collection<User> users) {
         if (users != null && !users.isEmpty()) {
             for (User user : users) {
@@ -105,5 +113,10 @@ public class UserMainService implements UserService {
             log.warn("User collection is empty or null.");
             return Collections.emptyList();
         }
+    }
+
+    @Override
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id);
     }
 }

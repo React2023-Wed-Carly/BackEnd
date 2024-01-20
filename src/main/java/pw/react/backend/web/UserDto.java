@@ -8,7 +8,7 @@ public record UserDto(Long id, String username, String password, @Email String e
 
     public static UserDto valueFrom(User user) {
         return new UserDto(user.getId(), user.getUsername(), null, user.getEmail(),user.getFirstname(),
-                user.getLastname(), user.getBalance(),user.getDistanceTravelled(), null);
+                user.getLastname(), user.getBalance(),user.getDistanceTravelled(), user.isAdmin());
     }
 
     public static User convertToUser(UserDto userDto) {

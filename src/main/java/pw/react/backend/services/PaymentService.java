@@ -10,7 +10,9 @@ public interface PaymentService {
     Payment updatePayment(Long id, Payment updatedPayment) throws ResourceNotFoundException;
     boolean deletePayment(Long paymentId);
     Collection<Payment> batchSave(Collection<Payment> payments);
+
     Optional<Payment> getById(Long paymentId);
     Collection<Payment> getAll();
     Collection<Payment> getByUserId(Long userId);
+    Collection<Payment> getAllOrderedByDate(int page);
 }

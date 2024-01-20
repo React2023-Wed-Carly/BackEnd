@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Null;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,12 +23,11 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.exceptions.UnauthorizedException;
 import pw.react.backend.exceptions.UserValidationException;
+import pw.react.backend.models.Booking;
 import pw.react.backend.models.Car;
 import pw.react.backend.models.CarImage;
 import pw.react.backend.services.*;
-import pw.react.backend.web.CarDto;
-import pw.react.backend.web.UploadFileResponse;
-import pw.react.backend.web.UserDto;
+import pw.react.backend.web.*;
 import pw.react.backend.models.User;
 
 import java.util.*;
@@ -46,10 +46,15 @@ public class ManageController {
     private final CarService carService;
     private final FavoriteCarService favoriteCarService;
     private ImageService carImageService;
-    public ManageController(UserService userService,CarService carService,FavoriteCarService favoriteCarService) {
+    private BookingService bookingService;
+    private PaymentService paymentService;
+    public ManageController(UserService userService,CarService carService,FavoriteCarService favoriteCarService
+                            ,BookingService bookingService,PaymentService paymentService) {
         this.userService = userService;
         this.carService=carService;
         this.favoriteCarService=favoriteCarService;
+        this.bookingService=bookingService;
+        this.paymentService=paymentService;
     }
     @Autowired
     public void setCarImageService(ImageService carImageService)
@@ -170,5 +175,107 @@ public class ManageController {
             throw new UserValidationException(ex.getMessage(),MANAGE_PATH+"/cars");
         }
 
+    }
+    @GetMapping("/users")
+    ResponseEntity<Collection<UserDto>> getUsers(Authentication auth,@RequestParam int page)
+    {
+        User us=userService.FindByUserName(auth.getName()).orElseThrow(()->new ResourceNotFoundException("user doesnt exists"));
+        if(!us.isAdmin())
+            throw new UnauthorizedException("only admins can access this endpoint",MANAGE_PATH);
+        try
+        {
+            Collection<UserDto> usrs=userService.GetAllNonAdmin(page).stream().map(UserDto::valueFrom).toList();
+            return ResponseEntity.ok(usrs);
+        }
+        catch (Exception ex)
+        {
+            throw new UserValidationException(ex.getMessage(),MANAGE_PATH+"/users");
+        }
+    }
+    @GetMapping("/bookings")
+    ResponseEntity<Collection<BookingDto>> getBookings(Authentication auth, @RequestParam int page)
+    {
+        User us=userService.FindByUserName(auth.getName()).orElseThrow(()->new ResourceNotFoundException("user doesnt exists"));
+        if(!us.isAdmin())
+            throw new UnauthorizedException("only admins can access this endpoint",MANAGE_PATH);
+        try
+        {
+            List<Long> ids=carService.getByOwnerId(us.getId()).stream().map(car -> car.getId()).toList();
+            Collection<BookingDto> bookingDtos=bookingService.getAllOwnersOrderedByDate(ids,page).stream().map(
+                    BookingDto::valueFrom).toList();
+            return ResponseEntity.ok(bookingDtos);
+        }
+        catch (Exception ex)
+        {
+            throw new UserValidationException(ex.getMessage(),MANAGE_PATH+"/bookings");
+        }
+    }
+    @DeleteMapping("/bookings")
+    ResponseEntity<Void> deleteBookign(Authentication auth,@RequestParam long bookingid)
+    {
+        User us=userService.FindByUserName(auth.getName()).orElseThrow(()->new ResourceNotFoundException("user doesnt exists"));
+        if(!us.isAdmin())
+            throw new UnauthorizedException("only admins can access this endpoint",MANAGE_PATH);
+        try
+        {
+            Booking booking=bookingService.getById(bookingid).orElseThrow(()->new ResourceNotFoundException("booking with given id doesnt exists"));
+            Car car=carService.getById(booking.getCarId()).orElseThrow(()->new ResourceNotFoundException("car with given id doesnt exists"));
+            if(car.getOwnerId()!=us.getId())
+                throw new UnauthorizedException("Admin can only edit his own cars",MANAGE_PATH);
+             boolean b=bookingService.deleteBooking(bookingid);
+             if(b)
+                 return ResponseEntity.ok(null);
+             else
+                 throw new Exception("something went wrong");
+        }
+        catch (Exception ex)
+        {
+            throw new UserValidationException(ex.getMessage(),MANAGE_PATH+"/bookings");
+        }
+    }
+    @GetMapping("/payments")
+    ResponseEntity<Collection<PaymentDto>> getAllPayments(Authentication auth,@RequestParam int page)
+    {
+        User us=userService.FindByUserName(auth.getName()).orElseThrow(()->new ResourceNotFoundException("user doesnt exists"));
+        if(!us.isAdmin())
+            throw new UnauthorizedException("only admins can access this endpoint",MANAGE_PATH);
+        try
+        {
+            List<PaymentDto> paymentDtos=paymentService.getAllOrderedByDate(page).stream().map(PaymentDto::valueFrom)
+                    .toList();
+            return ResponseEntity.ok(paymentDtos);
+
+        }
+        catch (Exception ex)
+        {
+            throw new UserValidationException(ex.getMessage(),MANAGE_PATH+"/bookings");
+        }
+    }
+    @PostMapping("/users")
+    ResponseEntity<UserDto> updateUser(Authentication auth,@RequestBody UserDto userDto)
+    {
+        User us=userService.FindByUserName(auth.getName()).orElseThrow(()->new ResourceNotFoundException("user doesnt exists"));
+        if(!us.isAdmin())
+            throw new UnauthorizedException("only admins can access this endpoint",MANAGE_PATH);
+        try
+        {
+          User user=UserDto.convertToUser(userDto);
+
+          User OGuser=userService.findById(userDto.id()).orElseThrow(()->new ResourceNotFoundException(
+                  "user with given id doesnt exists"
+          ));
+          if(OGuser.isAdmin())
+              throw  new IllegalAccessException("cant edit other admins");
+
+          userService.saveEdited(user);
+          if(userDto.password()!=null)
+            userService.updatePassword(user,userDto.password());
+
+          return ResponseEntity.ok(UserDto.valueFrom(user));
+        }
+        catch (Exception ex)
+        {
+            throw new UserValidationException(ex.getMessage(),MANAGE_PATH+"/bookings");
+        }
     }
 }

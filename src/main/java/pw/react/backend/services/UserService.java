@@ -10,6 +10,8 @@ public interface UserService {
     User updatePassword(User user, String password);
     Collection<User> batchSave(Collection<User> users);
     Collection<User> GetAll();
+    Collection<User> GetAllNonAdmin(int page);
     Optional<User> FindByUserName(String username);
     User saveEdited(User user);
+    Optional<User> findById(Long id);
 }

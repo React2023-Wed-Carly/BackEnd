@@ -13,5 +13,6 @@ public interface BookingService {
     Collection<Booking> batchSave(Collection<Booking> bookings);
     Optional<Booking> getById(Long bookingId);
     Collection<Booking> getAll();
+    Collection<Booking> getAllOwnersOrderedByDate(Collection<Long>ids,int page);
     Collection<Booking> getByCarId(Long carId);
 }

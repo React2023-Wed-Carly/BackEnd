@@ -2,6 +2,8 @@ package pw.react.backend.services;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Example;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import pw.react.backend.dao.BookingRepository;
 import pw.react.backend.dao.CarRepository;
@@ -63,5 +65,11 @@ public class BookingMainService implements BookingService{
     @Override
     public Optional<Booking> getById(Long bookingId) {
         return bookingRepository.findById(bookingId);
+    }
+
+    @Override
+    public Collection<Booking> getAllOwnersOrderedByDate(Collection<Long> ids,int page) {
+        Pageable pageable= PageRequest.of(page,1);
+        return bookingRepository.findAllByCarIdInOrderByStartDate(ids,pageable);
     }
 }
