@@ -166,7 +166,6 @@
 					<profiles>
 						<profile>mysql</profile>
 						<profile>jwt</profile>
-						<profile>batch</profile>
 					</profiles>
 				</configuration>
 			</plugin>

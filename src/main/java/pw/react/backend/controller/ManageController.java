@@ -84,6 +84,7 @@ public class ManageController {
             throw  new UnauthorizedException("only admin can access",MANAGE_PATH+"/cars");
         try {
             Car car=CarDto.ConvertToCar(carInput);
+            car.setOwnerId(us.getId());
             car= carService.save(car);
             if(car==null)
                 throw new Exception("car already exists");
@@ -111,9 +112,12 @@ public class ManageController {
                               @Valid @RequestBody CarDto updatedCar,Authentication auth) {
         User us=userService.FindByUserName(auth.getName()).orElseThrow(
                 ()->new ResourceNotFoundException("user doesnt exists"));
-        if(!us.isAdmin()||us.getId()!=updatedCar.ownerId())
+        Car oldcar=carService.getById(carId).orElseThrow(()->new ResourceNotFoundException("car doesnt exists"));
+        if(!us.isAdmin()||us.getId()!=oldcar.getOwnerId())
             throw  new UnauthorizedException("only admin can access",MANAGE_PATH+"/cars");
-        carService.updateCar(carId, CarDto.ConvertToCar(updatedCar));
+        Car newCar=CarDto.ConvertToCar(updatedCar);
+        newCar.setOwnerId(us.getId());
+        carService.updateCar(carId,newCar);
     }
 
     @PostMapping(path ="/cars/{carId}/image")
@@ -168,7 +172,7 @@ public class ManageController {
             throw new UserValidationException(ex.getMessage(),MANAGE_PATH+"/cars");
         }
     }
-    @DeleteMapping(value = "/{carId}/image")
+    @DeleteMapping(value = "/cars/{carId}/image")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeimage(@RequestHeader HttpHeaders headers, @PathVariable Long carId) {
 

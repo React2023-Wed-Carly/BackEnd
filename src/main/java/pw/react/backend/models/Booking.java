@@ -23,6 +23,8 @@ public class    Booking {
     private Double latitude;
     @Column
     private Double longitude;
+    @Column
+    private Long integratedSystemId;
 
     public Long getId() {
         return id;
@@ -64,4 +66,12 @@ public class    Booking {
     public void setLatitude(Double latitude) { this.latitude = latitude; }
     public Double getLongitude() { return longitude; }
     public void setLongitude(Double longitude) { this.longitude = longitude; }
+
+    public Long getIntegratedSystemId() {
+        return integratedSystemId;
+    }
+
+    public void setIntegratedSystemId(Long integratedSystemId) {
+        this.integratedSystemId = integratedSystemId;
+    }
 }

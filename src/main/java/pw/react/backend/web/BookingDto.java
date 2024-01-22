@@ -12,10 +12,10 @@ public record BookingDto(Long id, Long carId, Long userId,
                          LocalDateTime startDate,
                          @JsonDeserialize(using = JsonDateDeserializer.class) @JsonSerialize(using = JsonDateSerializer.class)
                          LocalDateTime endDate,
-                         Boolean completed, Double latitude, Double longitude) {
+                         Boolean completed, Double latitude, Double longitude,Long integratedSystemId) {
     public static BookingDto valueFrom(Booking b){
         return new BookingDto(b.getId(), b.getCarId(), b.getUserId(), b.getStartDate(), b.getEndDate(),
-                b.getCompleted(), b.getLatitude(), b.getLongitude());
+                b.getCompleted(), b.getLatitude(), b.getLongitude(),b.getIntegratedSystemId());
     }
     public static Booking ConvertToBooking(BookingDto bd)
     {
@@ -28,6 +28,7 @@ public record BookingDto(Long id, Long carId, Long userId,
         booking.setCompleted(bd.completed);
         booking.setLatitude(bd.latitude);
         booking.setLongitude(bd.longitude);
+        booking.setIntegratedSystemId(bd.integratedSystemId);
         return booking;
     }
 }

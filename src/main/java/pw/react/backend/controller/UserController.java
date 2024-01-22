@@ -140,8 +140,8 @@ public class UserController {
                     description = "Something went wrong"
             )
     })
-    @PostMapping("/favorites/")
-    public ResponseEntity<Void> AddFavorite(@RequestParam("carId") Long carId,Authentication auth)
+    @PostMapping("/favorites/{carId}")
+    public ResponseEntity<Void> AddFavorite(@PathVariable Long carId,Authentication auth)
         {
         try
         {
@@ -167,8 +167,8 @@ public class UserController {
             )
     })
     @Transactional
-    @DeleteMapping("/favorites/")
-    public ResponseEntity<Void> deleteFavorite(@RequestParam("carId") Long carId,Authentication auth)
+    @DeleteMapping("/favorites/{carId}")
+    public ResponseEntity<Void> deleteFavorite(@PathVariable Long carId,Authentication auth)
     {
         try
         {

@@ -16,7 +16,7 @@ import pw.react.backend.security.common.AuthenticationService;
 import pw.react.backend.security.common.CommonAuthenticationService;
 
 @Profile({"jwt"})
-public class WebJwtSecurityConfig {
+public class    WebJwtSecurityConfig {
 
     private final AuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final OncePerRequestFilter jwtRequestFilter;

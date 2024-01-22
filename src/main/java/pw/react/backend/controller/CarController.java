@@ -49,7 +49,19 @@ public class CarController {
         this.carService = carService;
         this.userService=userService;
     }
-
+    @GetMapping("")
+    public ResponseEntity<Collection<CarDto>> getCars(Authentication auth)
+    {
+     try
+     {
+         log.info(auth.getName());
+         return ResponseEntity.ok(carService.getAll().stream().map(CarDto::valueFrom).toList());
+     }
+     catch (Exception ex)
+     {
+         throw  new ResourceNotFoundException("something went wrong");
+     }
+    }
 @Operation(summary = "get all car info by id, includes info- with all fields and img with car image in binary")
     @ApiResponses(value = {
             @ApiResponse(
