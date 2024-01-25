@@ -13,6 +13,8 @@ public record BookingDto(Long id, Long carId, Long userId,
                          @JsonDeserialize(using = JsonDateDeserializer.class) @JsonSerialize(using = JsonDateSerializer.class)
                          LocalDateTime endDate,
                          Boolean completed, Double latitude, Double longitude,Long integratedSystemId) {
+    public static BookingDto EMPTY=new BookingDto(-1L,-1L,-1L,null,
+            null,false,0.0,0.0,-1L);
     public static BookingDto valueFrom(Booking b){
         return new BookingDto(b.getId(), b.getCarId(), b.getUserId(), b.getStartDate(), b.getEndDate(),
                 b.getCompleted(), b.getLatitude(), b.getLongitude(),b.getIntegratedSystemId());

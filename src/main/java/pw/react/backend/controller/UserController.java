@@ -17,7 +17,9 @@ import pw.react.backend.exceptions.UserValidationException;
 import pw.react.backend.models.Car;
 import pw.react.backend.models.CarImage;
 import pw.react.backend.services.*;
+import pw.react.backend.web.BookingDto;
 import pw.react.backend.web.CarDto;
+import pw.react.backend.web.PaymentDto;
 import pw.react.backend.web.UserDto;
 import pw.react.backend.models.User;
 
@@ -40,11 +42,16 @@ public class UserController {
     private final CarService carService;
     private final FavoriteCarService favoriteCarService;
     private ImageService carImageService;
+    private final PaymentService paymentService;
+    private final BookingService bookingService;
 
-    public UserController(UserService userService,CarService carService,FavoriteCarService favoriteCarService) {
+    public UserController(UserService userService,CarService carService,FavoriteCarService favoriteCarService
+    ,PaymentService paymentService,BookingService bookingService) {
         this.userService = userService;
         this.carService=carService;
         this.favoriteCarService=favoriteCarService;
+        this.paymentService=paymentService;
+        this.bookingService=bookingService;
     }
     @Autowired
     public void setCarImageService(ImageService carImageService)
@@ -70,6 +77,60 @@ public class UserController {
             User us=userService.FindByUserName(auth.getName())
                     .orElseThrow(()->new ResourceNotFoundException("couldnt find user"));
             return ResponseEntity.ok(UserDto.valueFrom(us));
+        }
+        catch (Exception exception)
+        {
+            throw new ResourceNotFoundException(exception.getMessage());
+        }
+    }
+    @Operation(summary = "get all user payments")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "User payments sent",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(allOf = PaymentDto.class))}
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Something went wrong"
+            )
+    })
+    @GetMapping("/details/payments")
+    public ResponseEntity<Collection<PaymentDto>> UserPayments(Authentication auth,@RequestParam("page") int page)
+    {
+        try{
+            User us=userService.FindByUserName(auth.getName())
+                    .orElseThrow(()->new ResourceNotFoundException("couldnt find user"));
+            Collection<PaymentDto> paymentDtos=paymentService.getUsersByDate(us.getId(),page)
+                    .stream().map(PaymentDto::valueFrom).toList();
+            return ResponseEntity.ok(paymentDtos);
+        }
+        catch (Exception exception)
+        {
+            throw new ResourceNotFoundException(exception.getMessage());
+        }
+    }
+    @Operation(summary = "get all user bookings")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "User bookings sent",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(allOf = BookingDto.class))}
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Something went wrong"
+            )
+    })
+    @GetMapping("/details/bookings")
+    public ResponseEntity<Collection<BookingDto>> UserBookings(Authentication auth,@RequestParam("page") int page)
+    {
+        try{
+            User us=userService.FindByUserName(auth.getName())
+                    .orElseThrow(()->new ResourceNotFoundException("couldnt find user"));
+            Collection<BookingDto> bookingDtos=bookingService.getAllUser(us.getId(),page)
+                    .stream().map(BookingDto::valueFrom).toList();
+            return ResponseEntity.ok(bookingDtos);
         }
         catch (Exception exception)
         {
@@ -147,6 +208,9 @@ public class UserController {
         {
             User us=userService.FindByUserName(auth.getName()).orElseThrow(
                     ()->new ResourceNotFoundException("user doesnt exists"));
+            Car car=carService.getById(carId).orElseThrow(
+                    ()->new ResourceNotFoundException("car doesnt exists")
+            );
             favoriteCarService.AddFavorite(us.getId(),carId);
             return new ResponseEntity<Void>(HttpStatus.CREATED);
         }

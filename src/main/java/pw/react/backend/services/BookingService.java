@@ -4,6 +4,8 @@ import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.models.Car;
 import pw.react.backend.models.Booking;
 
+import java.awt.print.Book;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -15,4 +17,7 @@ public interface BookingService {
     Collection<Booking> getAll();
     Collection<Booking> getAllOwnersOrderedByDate(Collection<Long>ids,int page);
     Collection<Booking> getByCarId(Long carId);
+    Collection<Booking> getAllUser(Long Id,int page);
+    Booking AddBooking(Booking booking);
+    Collection<Booking> FindOverlapping(LocalDateTime date);
 }

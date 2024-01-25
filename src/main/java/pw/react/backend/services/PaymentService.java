@@ -15,4 +15,6 @@ public interface PaymentService {
     Collection<Payment> getAll();
     Collection<Payment> getByUserId(Long userId);
     Collection<Payment> getAllOrderedByDate(int page);
+    Collection<Payment> getUsersByDate(Long UserId,int page);
+    Payment savePayment(Payment payment);
 }

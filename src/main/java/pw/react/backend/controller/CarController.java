@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,17 +18,17 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import pw.react.backend.exceptions.ResourceNotFoundException;
+import pw.react.backend.exceptions.UnauthorizedException;
 import pw.react.backend.exceptions.UserValidationException;
-import pw.react.backend.models.Car;
-import pw.react.backend.models.CarImage;
-import pw.react.backend.models.User;
-import pw.react.backend.services.CarService;
-import pw.react.backend.services.ImageService;
-import pw.react.backend.services.UserService;
+import pw.react.backend.models.*;
+import pw.react.backend.services.*;
+import pw.react.backend.web.BookingDto;
 import pw.react.backend.web.CarDto;
 import pw.react.backend.web.UploadFileResponse;
 import pw.react.backend.web.UserDto;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import org.springframework.security.core.Authentication;
@@ -40,22 +41,45 @@ public class CarController {
     private final CarService carService;
     @Autowired
     private final UserService userService;
+    private  final PaymentService paymentService;
+    private  final BookingService bookingService;
     private ImageService carImageService;
 
     @Autowired
     private void setCarImageService(ImageService carImageService){this.carImageService=carImageService;}
 
-    public CarController(CarService carService,UserService userService) {
+    public CarController(CarService carService,UserService userService,PaymentService paymentService,BookingService bookingService) {
         this.carService = carService;
         this.userService=userService;
+        this.paymentService=paymentService;
+        this.bookingService=bookingService;
     }
+    @Operation(summary = "get all cars with filters applied, ordered by distance, schema matching car details")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "ok",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(allOf = Map.class))}
+            ),
+            @ApiResponse(
+                    responseCode = "402",
+                    description = "Something went wrong"
+            )
+    })
     @GetMapping("")
-    public ResponseEntity<Collection<CarDto>> getCars(Authentication auth)
+    public ResponseEntity<Collection<CarDto>> getCars(Authentication auth,@RequestParam("page") int page
+    ,@RequestParam("lat") Double lat,@RequestParam("lon") Double lon,@RequestParam("minPrice") Long minP,
+                                                      @RequestParam("maxPrice") Long maxP,
+                                                      @RequestParam("minSeat") Long minS,
+                                                      @RequestParam("maxSeat") Long maxS,
+                                                      @RequestParam("trans") String trans)
     {
      try
      {
-         log.info(auth.getName());
-         return ResponseEntity.ok(carService.getAll().stream().map(CarDto::valueFrom).toList());
+         String[] transS=trans.split(";");
+         Collection<CarDto> cars=carService.getFilterdCars(page,lat,lon,minP,maxP,minS,maxS,transS).stream()
+                 .map(CarDto::valueFrom).toList();
+        return ResponseEntity.ok(cars);
      }
      catch (Exception ex)
      {
@@ -97,6 +121,64 @@ public class CarController {
             }
          catch (Exception ex) {
             throw new ResourceNotFoundException(ex.getMessage()+" "+CarController.CARS_PATH);
+        }
+    }
+    @Operation(summary = "post booking to car given by id")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "202",
+                    description = "booking added",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(oneOf = BookingDto.class))}
+            ),
+            @ApiResponse(
+                    responseCode = "402",
+                    description = "Something went wrong"
+            )
+    })
+    @PostMapping("/{carId}/bookings")
+    public ResponseEntity<BookingDto> PostCarBooking(Authentication auth,@PathVariable("carId") long carId,
+                                                      @RequestBody  BookingDto bookingDto)
+    {
+
+        try {
+            Booking booking=BookingDto.ConvertToBooking(bookingDto);
+            User us=userService.FindByUserName(auth.getName()).orElseThrow(
+                    ()->new UserValidationException("cant find user with given token"));
+            booking.setUserId(us.getId());
+            booking.setCompleted(Boolean.FALSE);
+            if(booking.getCarId()!=carId)
+            {
+                throw new IllegalAccessException(" path carId doesnt match booking car id");
+            }
+            Car car=carService.getById(carId).orElseThrow(
+                    ()->new ResourceNotFoundException("car with given id doesnt exists")
+            );
+            List<Booking> collisions=bookingService.FindOverlapping(booking.getStartDate()).stream().toList();
+            if(!collisions.isEmpty())
+                throw new ResourceNotFoundException("booking dates are overlapping");
+            long days=Duration.between(booking.getStartDate(), bookingDto.endDate()).toDays();
+            long cost=car.getDailyPrice()*days;
+            if(cost>us.getBalance())
+                throw new ResourceNotFoundException("not enough money");
+            Payment payment=new Payment();
+            payment.setAmount(Long.valueOf(cost));
+            System.out.println(payment.getAmount());
+            payment.setUserId(us.getId());
+            payment.setDate(LocalDateTime.now());
+            long balance=us.getBalance();
+            System.out.println(Long.valueOf(balance-cost));
+            us.setBalance(balance-cost);
+            userService.saveEdited(us);
+            paymentService.savePayment(payment);
+            booking.setId(null);
+
+            BookingDto bookingDto1= BookingDto.valueFrom(bookingService.AddBooking(booking));
+
+            return  ResponseEntity.status(202).body(bookingDto1);
+        }
+
+        catch (Exception ex) {
+            throw new ResourceNotFoundException(ex.getMessage()+" "+CARS_PATH+"/{id}/booking");
         }
     }
 }

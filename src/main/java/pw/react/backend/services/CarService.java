@@ -18,4 +18,5 @@ public interface CarService {
     Collection<Car> getAll();
     Collection<Car> getByOwnerId(Long id);
     Collection<Car> getbyIdIn(List<Long> ids,int page);
+    Collection<Car> getFilterdCars(int page,Double lat,Double lon,Long minP,Long maxP,Long minS,Long maxS,String[] trans);
 }

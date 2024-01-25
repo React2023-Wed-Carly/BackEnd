@@ -36,6 +36,7 @@ import java.util.*;
 import java.time.temporal.ChronoUnit.*;
 import org.springframework.security.core.Authentication;
 
+import javax.print.attribute.standard.Media;
 import javax.swing.text.html.parser.Entity;
 
 @RestController
@@ -93,6 +94,17 @@ public class ManageController {
             throw new ResourceNotFoundException(ex.getMessage());
         }
     }
+    @Operation(summary = "delete  car for admin")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Car deleted"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Something went wrong"
+            )
+    })
     @DeleteMapping(path = "/cars/{carId}")
     public ResponseEntity<String> deleteCar(@RequestHeader HttpHeaders headers, @PathVariable Long carId,Authentication auth) {
         Car car=carService.getById(carId).orElseThrow(()->new ResourceNotFoundException("car with given id doesnt exists"));
@@ -106,6 +118,18 @@ public class ManageController {
         }
         return ResponseEntity.ok(String.format("Car with id %s deleted.", carId));
     }
+    @Operation(summary = "Update car for admin")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Car updated",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(oneOf = CarDto.class))}
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Something went wrong"
+            )
+    })
     @PutMapping(path = "/cars/{carId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateCar(@RequestHeader HttpHeaders headers, @PathVariable Long carId,
@@ -120,7 +144,20 @@ public class ManageController {
         carService.updateCar(carId,newCar);
     }
 
-    @PostMapping(path ="/cars/{carId}/image")
+    @Operation(summary = "add image to car")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "image added",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(oneOf = UploadFileResponse.class))}
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Something went wrong"
+            )
+    })
+    @PostMapping(path ="/cars/{carId}/image",
+    consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public  ResponseEntity<UploadFileResponse> uploadLogo(Authentication auth,@RequestHeader HttpHeaders headers,
                                                           @PathVariable Long carId,
                                                           @RequestParam("file") MultipartFile file) {
@@ -151,7 +188,19 @@ public class ManageController {
             throw new UserValidationException(ex.getMessage(),MANAGE_PATH+"/cars");
         }
     }
-    @GetMapping(value = "/cars/{carId}/image", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @Operation(summary = "get car imgae")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Car image",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(oneOf = Resource.class))}
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Something went wrong"
+            )
+    })
+    @GetMapping(value = "/cars/{carId}/image")
     public ResponseEntity<Resource> getImg(Authentication auth,@RequestHeader HttpHeaders headers, @PathVariable Long carId) {
         try {
             User us = userService.FindByUserName(auth.getName())
@@ -172,12 +221,35 @@ public class ManageController {
             throw new UserValidationException(ex.getMessage(),MANAGE_PATH+"/cars");
         }
     }
+    @Operation(summary = "delete car image")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Car image deleted"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Something went wrong"
+            )
+    })
     @DeleteMapping(value = "/cars/{carId}/image")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void removeimage(@RequestHeader HttpHeaders headers, @PathVariable Long carId) {
 
         carImageService.deleteCarImage(carId);
     }
+    @Operation(summary = "get all admin cars")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Cars",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(allOf = CarDto.class))}
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Something went wrong"
+            )
+    })
     @GetMapping("/cars")
     public ResponseEntity<List<Map<String,Object>>> getAllCars(Authentication auth,@RequestParam("page") int page)
     {
@@ -212,6 +284,18 @@ public class ManageController {
         }
 
     }
+    @Operation(summary = "get all users")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "usres",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(allOf = UserDto.class))}
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Something went wrong"
+            )
+    })
     @GetMapping("/users")
     ResponseEntity<Collection<UserDto>> getUsers(Authentication auth,@RequestParam int page)
     {
@@ -228,6 +312,18 @@ public class ManageController {
             throw new UserValidationException(ex.getMessage(),MANAGE_PATH+"/users");
         }
     }
+    @Operation(summary = "get all bookings ")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "bookings",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(allOf = BookingDto.class))}
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Something went wrong"
+            )
+    })
     @GetMapping("/bookings")
     ResponseEntity<Collection<BookingDto>> getBookings(Authentication auth, @RequestParam int page)
     {
@@ -246,6 +342,17 @@ public class ManageController {
             throw new UserValidationException(ex.getMessage(),MANAGE_PATH+"/bookings");
         }
     }
+    @Operation(summary = "canel given booking")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "booking canceled"
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Something went wrong"
+            )
+    })
     @DeleteMapping("/bookings")
     ResponseEntity<Void> deleteBookign(Authentication auth,@RequestParam long bookingid)
     {
@@ -276,6 +383,18 @@ public class ManageController {
             throw new UserValidationException(ex.getMessage(),MANAGE_PATH+"/bookings");
         }
     }
+    @Operation(summary = "get all paymnets ")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "paymnets",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(allOf = PaymentDto.class))}
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Something went wrong"
+            )
+    })
     @GetMapping("/payments")
     ResponseEntity<Collection<PaymentDto>> getAllPayments(Authentication auth,@RequestParam int page)
     {

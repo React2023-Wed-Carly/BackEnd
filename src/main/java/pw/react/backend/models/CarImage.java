@@ -71,6 +71,14 @@ public class CarImage {
         this.data = data;
     }
 
+    public long getCarId() {
+        return carId;
+    }
+
+    public void setCarId(long carId) {
+        this.carId = carId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

@@ -12,6 +12,9 @@ import pw.react.backend.exceptions.UserValidationException;
 import pw.react.backend.models.User;
 import pw.react.backend.models.Car;
 import pw.react.backend.models.Booking;
+
+import java.awt.print.Book;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
@@ -69,7 +72,23 @@ public class BookingMainService implements BookingService{
 
     @Override
     public Collection<Booking> getAllOwnersOrderedByDate(Collection<Long> ids,int page) {
-        Pageable pageable= PageRequest.of(page,1);
+        Pageable pageable= PageRequest.of(page,20);
         return bookingRepository.findAllByCarIdInOrderByStartDate(ids,pageable);
+    }
+
+    @Override
+    public Collection<Booking> getAllUser(Long Id, int page) {
+        Pageable pageable =PageRequest.of(page,20);
+       return bookingRepository.findAllByUserIdOrderByStartDateDesc(Id,pageable);
+    }
+
+    @Override
+    public Booking AddBooking(Booking booking) {
+        return  bookingRepository.save(booking);
+    }
+
+    @Override
+    public Collection<Booking> FindOverlapping(LocalDateTime date) {
+        return  bookingRepository.findByEndDateAfter(date);
     }
 }

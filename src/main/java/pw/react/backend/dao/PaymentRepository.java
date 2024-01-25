@@ -10,4 +10,5 @@ import java.util.*;
 public interface PaymentRepository extends JpaRepository<Payment, Long>{
     Collection<Payment> findByUserId(Long userId);
     List<Payment> findAllByOrderByDate(Pageable pageable);
+    List<Payment> findAllByUserIdOrderByDateDesc(Long UserId,Pageable pageable);
 }

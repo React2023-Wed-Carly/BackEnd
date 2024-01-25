@@ -74,4 +74,15 @@ public class PaymentMainService implements PaymentService {
         Pageable pageable =PageRequest.of(page,20);
         return paymentRepository.findAllByOrderByDate(pageable);
     }
+    @Override
+    public Collection<Payment> getUsersByDate(Long UserId,int page)
+    {
+        Pageable pageable =PageRequest.of(page,20);
+        return paymentRepository.findAllByUserIdOrderByDateDesc(UserId,pageable);
+    }
+
+    @Override
+    public Payment savePayment(Payment payment) {
+        return paymentRepository.save(payment);
+    }
 }

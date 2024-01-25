@@ -88,4 +88,10 @@ public class CarMainService implements CarService{
         Pageable pageable=PageRequest.of(nr,20);
         return carRepository.findAllByOwnerIdOrderByIdDesc(ownerId,pageable);
     }
+
+    @Override
+    public Collection<Car> getFilterdCars(int page,Double lat,Double lon,Long minP,Long maxP,Long minS,Long maxS,String[] trans) {
+        Pageable pageable=PageRequest.of(page,20);
+        return carRepository.findAllUsersWithPagination(lat,lon,minP,maxP,minS,maxS,trans,pageable);
+    }
 }

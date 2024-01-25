@@ -18,9 +18,18 @@ public class JsonDateDeserializer extends JsonDeserializer<LocalDateTime> {
         ObjectCodec oc = jp.getCodec();
         TextNode node = oc.readTree(jp);
         String dateString = node.textValue();
-        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
-        return LocalDateTime.parse(dateString, formatter)
-                .atZone(ZoneId.systemDefault())
-                .toLocalDateTime();
+        String[] Dtime=dateString.split("T");
+        String[] date= (Dtime[0].split("-"));
+        String[] time=Dtime[1].split((":"));
+        String[] seconds=time[2].split("\\.");
+        return LocalDateTime.of(
+                Integer.parseInt(date[0]),
+                Integer.parseInt(date[1]),
+                Integer.parseInt(date[2]),
+                Integer.parseInt(time[0]),
+                Integer.parseInt(time[1]),
+                Integer.parseInt(seconds[0])
+        );
+
     }
 }
