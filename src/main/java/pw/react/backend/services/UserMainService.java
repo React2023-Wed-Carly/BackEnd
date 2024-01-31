@@ -96,9 +96,10 @@ public class UserMainService implements UserService {
     }
 
     @Override
-    public Collection<User> GetAllNonAdmin(int page) {
+    public Collection<User> GetAllNonAdmin(int page,long id,String username) {
         Pageable pageable= PageRequest.of(page,20);
-        return userRepository.findAllByIsAdminOrderById(Boolean.FALSE,pageable);
+        return userRepository.findByIdAndIsAdminOrUsernameLikeAndIsAdmin
+                (Long.valueOf(id),Boolean.FALSE,username,Boolean.FALSE,pageable);
     }
 
     @Override

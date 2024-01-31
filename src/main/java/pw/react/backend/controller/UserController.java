@@ -16,6 +16,7 @@ import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.exceptions.UserValidationException;
 import pw.react.backend.models.Car;
 import pw.react.backend.models.CarImage;
+import pw.react.backend.models.Payment;
 import pw.react.backend.services.*;
 import pw.react.backend.web.BookingDto;
 import pw.react.backend.web.CarDto;
@@ -23,6 +24,7 @@ import pw.react.backend.web.PaymentDto;
 import pw.react.backend.web.UserDto;
 import pw.react.backend.models.User;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import org.springframework.security.core.Authentication;
@@ -157,6 +159,11 @@ public class UserController {
             Long oldBalance=us.getBalance();
             us.setBalance(oldBalance+amount);
             userService.saveEdited(us);
+            Payment payment =new Payment();
+            payment.setUserId(us.getId());
+            payment.setDate(LocalDateTime.now());
+            payment.setAmount(Long.valueOf(amount));
+            paymentService.savePayment(payment);
             return new ResponseEntity<Void>(HttpStatus.OK);
         }
         catch (Exception ex)
@@ -181,6 +188,8 @@ public class UserController {
         try {
             User us=UserDto.convertToUser(user);
             us.setAdmin(false);
+            us.setBalance(Long.valueOf(0));
+            us.setDistanceTravelled(Long.valueOf(0));
              us= userService.validateAndSave(us);
             if(us==null)
                 throw new UserValidationException("username already exists");

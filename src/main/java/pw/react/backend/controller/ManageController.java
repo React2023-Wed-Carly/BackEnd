@@ -77,6 +77,7 @@ public class ManageController {
                     description = "Something went wrong"
             )
     })
+
     @PostMapping(path = "/cars")
     public ResponseEntity<CarDto> createCar(@RequestBody CarDto carInput,Authentication auth) {
         User us=userService.FindByUserName(auth.getName()).orElseThrow(
@@ -251,6 +252,7 @@ public class ManageController {
             )
     })
     @GetMapping("/cars")
+
     public ResponseEntity<List<Map<String,Object>>> getAllCars(Authentication auth,@RequestParam("page") int page)
     {
         User us=userService.FindByUserName(auth.getName()).orElseThrow(
@@ -276,7 +278,8 @@ public class ManageController {
                 obj.put("img",bytes);
                 resp.add(obj);
             }
-            return ResponseEntity.ok(resp);
+
+            return ResponseEntity.ok().body(resp);
         }
         catch (Exception ex)
         {
@@ -297,14 +300,16 @@ public class ManageController {
             )
     })
     @GetMapping("/users")
-    ResponseEntity<Collection<UserDto>> getUsers(Authentication auth,@RequestParam int page)
+    ResponseEntity<Collection<UserDto>> getUsers(Authentication auth,@RequestParam int page,@RequestParam long userId
+    ,@RequestParam String username)
     {
         User us=userService.FindByUserName(auth.getName()).orElseThrow(()->new ResourceNotFoundException("user doesnt exists"));
         if(!us.isAdmin())
             throw new UnauthorizedException("only admins can access this endpoint",MANAGE_PATH);
         try
         {
-            Collection<UserDto> usrs=userService.GetAllNonAdmin(page).stream().map(UserDto::valueFrom).toList();
+            username="%"+username+"%";
+            Collection<UserDto> usrs=userService.GetAllNonAdmin(page,userId,username).stream().map(UserDto::valueFrom).toList();
             return ResponseEntity.ok(usrs);
         }
         catch (Exception ex)
@@ -353,8 +358,8 @@ public class ManageController {
                     description = "Something went wrong"
             )
     })
-    @DeleteMapping("/bookings")
-    ResponseEntity<Void> deleteBookign(Authentication auth,@RequestParam long bookingid)
+    @DeleteMapping("/bookings/{bookingId}")
+    ResponseEntity<Void> deleteBookign(Authentication auth,@PathVariable("bookingId") long bookingid)
     {
         User us=userService.FindByUserName(auth.getName()).orElseThrow(()->new ResourceNotFoundException("user doesnt exists"));
         if(!us.isAdmin())

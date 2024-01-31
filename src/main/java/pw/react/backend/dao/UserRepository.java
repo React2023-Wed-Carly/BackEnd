@@ -9,5 +9,5 @@ import java.util.*;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
     List<User> findAllByUsernameIn(Collection<String> userNames);
-    List<User> findAllByIsAdminOrderById(Boolean isAdmin,Pageable pageable);
+    List<User> findByIdAndIsAdminOrUsernameLikeAndIsAdmin(Long id,Boolean isAdmin1,String username,Boolean isAdmin2,Pageable pageable);
 }

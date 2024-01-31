@@ -67,7 +67,7 @@ public class CarController {
             )
     })
     @GetMapping("")
-    public ResponseEntity<Collection<CarDto>> getCars(Authentication auth,@RequestParam("page") int page
+    public ResponseEntity<Collection<Map<String,Object>>> getCars(Authentication auth,@RequestParam("page") int page
     ,@RequestParam("lat") Double lat,@RequestParam("lon") Double lon,@RequestParam("minPrice") Long minP,
                                                       @RequestParam("maxPrice") Long maxP,
                                                       @RequestParam("minSeat") Long minS,
@@ -79,7 +79,20 @@ public class CarController {
          String[] transS=trans.split(";");
          Collection<CarDto> cars=carService.getFilterdCars(page,lat,lon,minP,maxP,minS,maxS,transS).stream()
                  .map(CarDto::valueFrom).toList();
-        return ResponseEntity.ok(cars);
+         Collection<Map<String,Object>> resp=new ArrayList<>();
+         for (CarDto c:cars) {
+             CarImage img=carImageService.getCarImage(c.id());
+             byte[] bytes;
+             if(img!=null)
+                 bytes=img.getData();
+             else
+                 bytes=null;
+             Map<String,Object> obj=new HashMap<>();
+             obj.put("info",c);
+             obj.put("img",bytes);
+             resp.add(obj);
+         }
+        return ResponseEntity.ok(resp);
      }
      catch (Exception ex)
      {
@@ -178,6 +191,31 @@ public class CarController {
         }
 
         catch (Exception ex) {
+            throw new ResourceNotFoundException(ex.getMessage()+" "+CARS_PATH+"/{id}/booking");
+        }
+    }
+    @Operation(summary = "get car bookings")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "bookings",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(allOf = BookingDto.class))}
+            ),
+            @ApiResponse(
+                    responseCode = "402",
+                    description = "Something went wrong"
+            )
+    })
+    @GetMapping("/{carId}/bookings")
+    public ResponseEntity<Collection<BookingDto>> getcarBookings(Authentication auth,@PathVariable("carId") long carId)
+    {
+        try
+        {
+            Collection<BookingDto> bookingDtos=bookingService.getByCarId(carId).stream().map(BookingDto::valueFrom).toList();
+            return ResponseEntity.ok(bookingDtos);
+        }
+        catch (Exception ex)
+        {
             throw new ResourceNotFoundException(ex.getMessage()+" "+CARS_PATH+"/{id}/booking");
         }
     }
