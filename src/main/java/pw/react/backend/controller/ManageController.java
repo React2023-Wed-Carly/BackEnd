@@ -117,6 +117,7 @@ public class ManageController {
         if (!deleted) {
             return ResponseEntity.badRequest().body(String.format("Car with id %s does not exist.", carId));
         }
+
         return ResponseEntity.ok(String.format("Car with id %s deleted.", carId));
     }
     @Operation(summary = "Update car for admin")
@@ -300,8 +301,8 @@ public class ManageController {
             )
     })
     @GetMapping("/users")
-    ResponseEntity<Collection<UserDto>> getUsers(Authentication auth,@RequestParam int page,@RequestParam long userId
-    ,@RequestParam String username)
+    ResponseEntity<Collection<UserDto>> getUsers(Authentication auth,@RequestParam int page,@RequestParam(defaultValue = "0") long userId
+    ,@RequestParam(defaultValue = "") String username)
     {
         User us=userService.FindByUserName(auth.getName()).orElseThrow(()->new ResourceNotFoundException("user doesnt exists"));
         if(!us.isAdmin())
@@ -317,6 +318,37 @@ public class ManageController {
             throw new UserValidationException(ex.getMessage(),MANAGE_PATH+"/users");
         }
     }
+    @Operation(summary = "get  user by id")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "user",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(oneOf = UserDto.class))}
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Something went wrong"
+            )
+    })
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<UserDto> getUserDetails(Authentication auth,@PathVariable("userId") long id)
+    {
+        User us=userService.FindByUserName(auth.getName()).orElseThrow(()->new ResourceNotFoundException("user doesnt exists"));
+        if(!us.isAdmin())
+            throw new UnauthorizedException("only admins can access this endpoint",MANAGE_PATH);
+        try
+        {
+            UserDto userDto=UserDto.valueFrom(userService.findById(id).orElseThrow(
+                    ()->new ResourceNotFoundException("user with given id doest exists")
+            ));
+            return ResponseEntity.ok(userDto);
+        }
+        catch (Exception ex)
+        {
+            throw new UserValidationException(ex.getMessage(),MANAGE_PATH+"/bookings");
+        }
+    }
+
     @Operation(summary = "get all bookings ")
     @ApiResponses(value = {
             @ApiResponse(

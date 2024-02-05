@@ -88,7 +88,13 @@ public class BookingMainService implements BookingService{
     }
 
     @Override
-    public Collection<Booking> FindOverlapping(LocalDateTime date) {
-        return  bookingRepository.findByEndDateAfter(date);
+    public Collection<Booking> FindOverlapping(Long carId,LocalDateTime date) {
+        return  bookingRepository.findByCarIdAndEndDateAfter(carId,date);
+    }
+
+    @Override
+    public Collection<Booking> getAllInegratedUser(Long Id, int page, Long intId) {
+        Pageable pageable=PageRequest.of(page,20);
+        return bookingRepository.findAllByUserIdAndAndIntegratedSystemIdOrderByStartDateDesc(Id,intId,pageable);
     }
 }

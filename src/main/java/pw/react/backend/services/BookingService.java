@@ -18,6 +18,7 @@ public interface BookingService {
     Collection<Booking> getAllOwnersOrderedByDate(Collection<Long>ids,int page);
     Collection<Booking> getByCarId(Long carId);
     Collection<Booking> getAllUser(Long Id,int page);
+    Collection<Booking> getAllInegratedUser(Long Id,int page,Long intId);
     Booking AddBooking(Booking booking);
-    Collection<Booking> FindOverlapping(LocalDateTime date);
+    Collection<Booking> FindOverlapping(Long carId,LocalDateTime date);
 }

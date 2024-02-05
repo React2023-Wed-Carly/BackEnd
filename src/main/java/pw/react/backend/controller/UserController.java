@@ -14,22 +14,18 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import pw.react.backend.exceptions.ResourceNotFoundException;
 import pw.react.backend.exceptions.UserValidationException;
-import pw.react.backend.models.Car;
-import pw.react.backend.models.CarImage;
-import pw.react.backend.models.Payment;
+import pw.react.backend.models.*;
 import pw.react.backend.services.*;
 import pw.react.backend.web.BookingDto;
 import pw.react.backend.web.CarDto;
 import pw.react.backend.web.PaymentDto;
 import pw.react.backend.web.UserDto;
-import pw.react.backend.models.User;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 import org.springframework.security.core.Authentication;
 
-import javax.swing.text.html.parser.Entity;
 
 
 @RestController
@@ -38,7 +34,7 @@ public class UserController {
 
     private static final Logger log = LoggerFactory.getLogger(UserController.class);
     static final String USERS_PATH = "/users";
-
+    private final static Long PARKLY_ID=5L;
 
     private final UserService userService;
     private final CarService carService;
@@ -131,6 +127,36 @@ public class UserController {
             User us=userService.FindByUserName(auth.getName())
                     .orElseThrow(()->new ResourceNotFoundException("couldnt find user"));
             Collection<BookingDto> bookingDtos=bookingService.getAllUser(us.getId(),page)
+                    .stream().map(BookingDto::valueFrom).toList();
+            return ResponseEntity.ok(bookingDtos);
+        }
+        catch (Exception exception)
+        {
+            throw new ResourceNotFoundException(exception.getMessage());
+        }
+    }
+    @Operation(summary = "get all parkly user bookings")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "User bookings sent",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(allOf = BookingDto.class))}
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Something went wrong"
+            )
+    })
+    @GetMapping("/details/bookings/{IntegratedId}")
+    public ResponseEntity<Collection<BookingDto>> IntegratedUserBookings(@PathVariable("IntegratedId")Long intId, Authentication auth,@RequestParam("page") int page)
+    {
+        try{
+
+            User us=userService.FindByUserName(auth.getName())
+                    .orElseThrow(()->new ResourceNotFoundException("couldnt find user"));
+            if(us.getId()!=PARKLY_ID)
+                throw new UserValidationException("only Parkly proxy can access this endpoint");
+            Collection<BookingDto> bookingDtos=bookingService.getAllInegratedUser(us.getId(),page,intId)
                     .stream().map(BookingDto::valueFrom).toList();
             return ResponseEntity.ok(bookingDtos);
         }
@@ -296,6 +322,37 @@ public class UserController {
                 resp.add(obj);
             }
             return ResponseEntity.ok(resp);
+        }
+        catch (Exception ex)
+        {
+            throw new UserValidationException(ex.getMessage(),USERS_PATH+"/favorites");
+        }
+
+    }
+    @Operation(summary = "check if car is favorite")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "boolean info",
+                    content = {@Content(mediaType = "application/json", schema = @Schema(oneOf = Boolean.class))}
+
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Something went wrong"
+            )
+    })
+    @GetMapping("favorites/isFavorite/{carId}")
+    public ResponseEntity<Boolean> isFavorite(Authentication auth,@PathVariable("carId") long carId)
+    {
+        try {
+            User us = userService.FindByUserName(auth.getName()).orElseThrow(
+                    () -> new ResourceNotFoundException("user doesnt exists"));
+            Optional<FavoriteCars> fc=favoriteCarService.findIfFavorite(us.getId(),carId);
+            if(fc.isPresent())
+                return ResponseEntity.ok(Boolean.TRUE);
+            else
+                return ResponseEntity.ok(Boolean.FALSE);
         }
         catch (Exception ex)
         {

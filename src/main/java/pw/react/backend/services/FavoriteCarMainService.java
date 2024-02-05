@@ -7,6 +7,7 @@ import pw.react.backend.dao.FavoriteCarsRepository;
 import pw.react.backend.models.FavoriteCars;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public class FavoriteCarMainService implements FavoriteCarService{
     private static final Logger logger = LoggerFactory.getLogger(CarMainService.class);
@@ -22,6 +23,11 @@ public class FavoriteCarMainService implements FavoriteCarService{
     }
 
     @Override
+    public void deleteByCarId(Long carId) {
+        favoriteCarsRepository.deleteByCarId(carId);
+    }
+
+    @Override
     public void AddFavorite(Long userId, Long carId) {
 
         FavoriteCars fc=new FavoriteCars();
@@ -30,6 +36,11 @@ public class FavoriteCarMainService implements FavoriteCarService{
         if(favoriteCarsRepository.findAllByUserIdAndCarId(userId,carId).isEmpty())
             favoriteCarsRepository.save(fc);
 
+    }
+
+    @Override
+    public Optional<FavoriteCars> findIfFavorite(Long userId, Long carId) {
+        return favoriteCarsRepository.findByUserIdAndCarId(userId,carId);
     }
 
     @Override

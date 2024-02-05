@@ -15,6 +15,7 @@ public interface CarRepository extends JpaRepository<Car, Long>{
     @Query(
             value = "SELECT * FROM Car c where c.daily_price>=?3 and c.daily_price<=?4 and c.seating_capacity>=?5" +
                     " and c.seating_capacity<=?6 and c.transmission in ?7" +
+                    " and c.Id not in (select car_id from booking b where b.end_date>=NOW() )" +
                     " order by (c.latitude-?1)*(c.latitude-?1)+(c.longitude-?2)*(c.longitude-?2) ",
             countQuery = "SELECT count(*) FROM Car",
             nativeQuery = true)

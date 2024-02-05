@@ -37,6 +37,7 @@ import org.springframework.security.core.Authentication;
 public class CarController {
     public final static String CARS_PATH = "/cars";
     private static final Logger log = LoggerFactory.getLogger(CarController.class);
+    private final static Long PARKLY_ID= 5L;
     @Autowired
     private final CarService carService;
     @Autowired
@@ -157,6 +158,8 @@ public class CarController {
             Booking booking=BookingDto.ConvertToBooking(bookingDto);
             User us=userService.FindByUserName(auth.getName()).orElseThrow(
                     ()->new UserValidationException("cant find user with given token"));
+            if(us.getId().equals(PARKLY_ID)&&booking.getIntegratedSystemId()==null)
+                throw new UserValidationException("integreated system booking requires user id");
             booking.setUserId(us.getId());
             booking.setCompleted(Boolean.FALSE);
             if(booking.getCarId()!=carId)
@@ -166,7 +169,7 @@ public class CarController {
             Car car=carService.getById(carId).orElseThrow(
                     ()->new ResourceNotFoundException("car with given id doesnt exists")
             );
-            List<Booking> collisions=bookingService.FindOverlapping(booking.getStartDate()).stream().toList();
+            List<Booking> collisions=bookingService.FindOverlapping(booking.getCarId(),booking.getStartDate()).stream().toList();
             if(!collisions.isEmpty())
                 throw new ResourceNotFoundException("booking dates are overlapping");
             long days=Duration.between(booking.getStartDate(), bookingDto.endDate()).toDays();

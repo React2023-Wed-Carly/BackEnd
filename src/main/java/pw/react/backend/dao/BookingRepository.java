@@ -12,6 +12,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long>{
     Collection<Booking> findByCarId(Long carId);
     List<Booking> findAllByCarIdInOrderByStartDate(Collection<Long> CarIds, Pageable pageable);
     List<Booking> findAllByUserIdOrderByStartDateDesc(Long userId,Pageable pageable);
-    Collection<Booking> findByEndDateAfter(LocalDateTime date);
+    Collection<Booking> findByCarIdAndEndDateAfter(Long userId,LocalDateTime date);
+    List<Booking> findAllByUserIdAndAndIntegratedSystemIdOrderByStartDateDesc(Long userId,Long IntId,Pageable pageable);
 
 }
